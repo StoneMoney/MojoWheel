@@ -1,0 +1,131 @@
+<html>
+<head>
+<style>
+button {
+	width:100%;
+}
+.record {
+	font-size:36px;
+	font-family:sans-serif;
+}
+.hidden {
+	visibility:hidden;
+}
+#reconnect {
+	width:35vw;
+}
+</style>
+</head>
+<body>
+<h1 id="message"></h1>
+<p id="status" style="color:red">&#11044; connection to server</p><button id="reconnect" onclick="reconnectToServer()">Reconnect</button>
+<table>
+	<tr>
+		<td><input disabled id="textForWheel"></input><select disabled id="slotSelect"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></td>
+		<td><button disabled id="add" onclick="addToWheel()">Add to wheel</button><button disabled id="remove" onclick="removeFromWheel()">Remove from wheel</button></td>
+	</tr>
+	<tr>
+		<td colspan="2"><button disabled id="spin" onclick="spinTheWheel()" height="400px">SPIN THAT WHEEL!</button></td>
+	</tr>
+</table>
+<p>Preview of wheel contents</p>
+<select disabled id="queue" size="8" width="500px">
+	<option id="wheel1">Not connected</option>
+	<option id="wheel2">Not connected</option>
+	<option id="wheel3">Not connected</option>
+	<option id="wheel4">Not connected</option>
+	<option id="wheel5">Not connected</option>
+	<option id="wheel6">Not connected</option>
+	<option id="wheel7">Not connected</option>
+	<option id="wheel8">Not connected</option>
+</select></br>
+<b id="lastSpun">Previous spin result will show here</b>
+
+<script>
+	var wasUpdated = false;
+	var x = document.getElementById("queue");
+	//create a new WebSocket object.
+	websocket = new WebSocket("ws://localhost:8080/");
+	function reconnectToServer() {
+		location.reload();
+	}
+	websocket.onopen = function() { 
+		document.getElementById("status").style.color = "green";
+		websocket.send("requesting");
+		document.getElementById("add").disabled = false;
+		document.getElementById("remove").disabled = false;
+		document.getElementById("spin").disabled = false;
+		document.getElementById("textForWheel").disabled = false;
+		document.getElementById("slotSelect").disabled = false;
+		document.getElementById("reconnect").classList.add("hidden");
+	}; 
+	websocket.onmessage = function(ev) {
+		if(ev.data.startsWith("sendtowheel ")) {
+			if(ev.data.startsWith("sendtowheel 1 ")) {
+				var formattedText = ev.data.replace("sendtowheel 1 ","");
+				document.getElementById("wheel1").innerHTML = formattedText;
+			} else if(ev.data.startsWith("sendtowheel 2 ")) {
+				var formattedText = ev.data.replace("sendtowheel 2 ","");
+				document.getElementById("wheel2").innerHTML = formattedText;
+			} else if(ev.data.startsWith("sendtowheel 3 ")) {
+				var formattedText = ev.data.replace("sendtowheel 3 ","");
+				document.getElementById("wheel3").innerHTML = formattedText;
+			} else if(ev.data.startsWith("sendtowheel 4 ")) {
+				var formattedText = ev.data.replace("sendtowheel 4 ","");
+				document.getElementById("wheel4").innerHTML = formattedText;
+			} else if(ev.data.startsWith("sendtowheel 5 ")) {
+				var formattedText = ev.data.replace("sendtowheel 5 ","");
+				document.getElementById("wheel5").innerHTML = formattedText;
+			} else if(ev.data.startsWith("sendtowheel 6 ")) {
+				var formattedText = ev.data.replace("sendtowheel 6 ","");
+				document.getElementById("wheel6").innerHTML = formattedText;
+			} else if(ev.data.startsWith("sendtowheel 7 ")) {
+				var formattedText = ev.data.replace("sendtowheel 7 ","");
+				document.getElementById("wheel7").innerHTML = formattedText;
+			} else if(ev.data.startsWith("sendtowheel 8 ")) {
+				var formattedText = ev.data.replace("sendtowheel 8 ","");
+				document.getElementById("wheel8").innerHTML = formattedText;
+			} else if(ev.data.startsWith("sendtowheel 9 ")) {
+				var formattedText = ev.data.replace("sendtowheel 9 ","");
+				document.getElementById("wheel9").innerHTML = formattedText;
+			} 
+		} else if (ev.data.startsWith("wheelselected ")) {
+			var formattedText = ev.data.replace("wheelselected ","Previous spin: ");
+			document.getElementById("lastSpun").innerHTML = formattedText;
+		} else {
+			
+		}
+	}
+	websocket.onclose = function() { 
+		document.getElementById("add").disabled = true;
+		document.getElementById("remove").disabled = true;
+		document.getElementById("spin").disabled = true;
+		document.getElementById("textForWheel").disabled = true;
+		document.getElementById("slotSelect").disabled = true;
+		document.getElementById("queue").disabled = true;
+		document.getElementById("status").style.color = "red";
+		document.getElementById("reconnect").classList.remove("hidden");
+	}; 
+	function addToWheel() {
+		var content = document.getElementById("textForWheel").value;
+		var slotNo = document.getElementById("slotSelect").value;
+		var option = document.getElementById("wheel"+slotNo);
+		if(content != "") {
+			option.text = content;
+			websocket.send("addtogoalwheel "+slotNo+" "+content); //send method
+			document.getElementById('textForWheel').value = "";
+			wasUpdated = true;
+		}
+	}
+	function removeFromWheel() {
+		var slotNo = document.getElementById("slotSelect").value;
+		var option = document.getElementById("wheel"+slotNo);
+		option.text = "Nothing";
+		websocket.send("addtogoalwheel "+slotNo+" "+"Nothing"); //send method
+	}
+	function spinTheWheel() {
+		websocket.send("spin");
+	}
+</script>
+</body>
+</html>

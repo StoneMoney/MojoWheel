@@ -1,0 +1,17 @@
+{
+  "name": "mojowheel",
+  "version": "1.0.0",
+  "description": "8-slot wheel spinner via websockets",
+  "main": "server.js",
+  "dependencies": {
+    "jfs": "^0.2.6",
+    "ws": "^2.2.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "stonemoney",
+  "license": "MIT"
+}
