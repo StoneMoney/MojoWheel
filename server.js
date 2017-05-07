@@ -42,13 +42,8 @@ wss.on('connection', function connection(ws) {
 	}
 	wss.clients.forEach(function each(client) {
 		if (client !== ws && client.readyState === WebSocket.OPEN) {
-			if (re1.test(message)) {
-				var matches = message.match(pattern1);
-				client.send("sendtowheel "+matches[1]+" "+matches[2]);
-			} else {
 				client.send(message);
-			}
-		};
+		}
 	});
   });
 });

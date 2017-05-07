@@ -18,3 +18,9 @@ Results.html is front-end visual graphics of the wheel including sound and anima
 Server.js is the websocket server which passes along the strings, and also stores them locally. Runs default on port 8080
 
 To start the server run ``node server.js`` or ``npm start``
+
+## Todo & Future features
+
+* Select item via preview list instead of typing id
+* Toggles (Mute wheel)
+* Import list

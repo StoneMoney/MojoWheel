@@ -19,7 +19,7 @@ table {
 	font-family:'Open Sans',sans-serif;
 	font-weight:bold;
 	color:#3b3b3b;
-	border-width: 10px;
+	border-width: 8px;
 	border-radius: 5px;
 	border-style:solid;
 	border-color:#3b3b3b;
@@ -33,7 +33,7 @@ img {
 <body>
 <table id="table">
 	<tr style="height:17vh;	font-size:15vh;">
-		<td colspan="3">Spin that Wheel!</td>
+		<td colspan="3">SPINNING WHEEL...</td>
 	</tr>
 	<tr>
 		<td style="height:53vh;width:9vw"><img src="bit.png"/></td>
@@ -43,19 +43,20 @@ img {
 </table>
 <script>
 var click = new Audio('spinningsound.ogg');
-var wheelArray = [];
+var wheelArray = {};
+Array.prototype.removeValue = function(name, value){
+   var array = $.map(this, function(v,i){
+      return v[name] === value ? null : v;
+   });
+   this.length = 0; //clear original array
+   this.push.apply(this, array); //push all elements except the one we want to delete
+}
 var pattern1 = "^sendtowheel ([0-9]+) (.*)";
 var re1 = new RegExp(pattern1,"i");
-var pattern2 = "^removefromwheel ([0-9]+)";
-var re2 = new RegExp(pattern2,"i");
-Array.prototype.insert = function ( index, item ) {
-    this.splice( index, 0, item );
-};
 //create a new WebSocket object.
 websocket = new WebSocket("ws://localhost:8080/");
 websocket.onopen = function() {
 	$('#table').fadeOut('slow');
-	websocket.send("requesting");
 };
 websocket.onclose = function() {
 	$('#table').fadeIn('slow');
@@ -68,20 +69,19 @@ websocket.onmessage = function(ev) {
 	if (re1.test(ev.data)) {
 		var message = ev.data;
 		var matches = message.match(pattern1);
-		wheelArray.insert(matches[1], matches[2]);
-	};
-	if (re2.test(ev.data)) {
-		var message = ev.data;
-		var matches = message.match(pattern2);
-		var indexToRemove = wheelArray.indexOf(matches[1]);
-		wheelArray.splice(indexToRemove,1);
+		wheelArray.push(matches[2]);
 	};
 	if (ev.data.startsWith("spin")) {
+		var finalSelection;
 		//begin insane animation spree
-		console.log(wheelArray);
+		wheelArray=[];
+		websocket.send("requesting");
 		$('#table').fadeIn('fast');
 		setTimeout(function() {
-			selection = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+			finalSelection = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+		},10);
+		setTimeout(function() {
+			document.getElementById('selection').innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			click.play();
 		},25);
 		setTimeout(function() {
@@ -389,14 +389,13 @@ websocket.onmessage = function(ev) {
 			}
 		},3000);
 		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+			document.getElementById("selection").innerHTML = finalSelection;
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-			var selection = document.getElementById("selection").innerHTML;
-			websocket.send("wheelselected "+selection);
+			websocket.send("wheelselected "+finalSelection);
 		},3200);
 		setTimeout(function() {
 			$('#table').fadeOut('slow');
