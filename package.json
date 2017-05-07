@@ -1,10 +1,11 @@
 {
   "name": "mojowheel",
-  "version": "1.0.0",
-  "description": "8-slot wheel spinner via websockets",
+  "version": "1.1.0",
+  "description": "Websocket wheel spinner. Great for streaming overlays",
   "main": "server.js",
   "dependencies": {
-    "ws": "^2.2.3"
+    "ws": "^2.2.3",
+	"glob":"^7.1.1"
   },
   "devDependencies": {},
   "scripts": {

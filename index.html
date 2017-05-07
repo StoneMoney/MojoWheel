@@ -1,6 +1,17 @@
 <html>
 <head>
+<title>MojoWheel v1.1</title>
 <style>
+@font-face {
+    font-family: "Open Sans";
+    src: url(fonts/OpenSans.ttf) format("truetype");
+}
+h1, p, b, button {
+	font-family:"Open Sans",sans-serif;
+}
+input,option {
+	font-family: monospace;
+}
 button {
 	width:100%;
 }
@@ -19,37 +30,53 @@ button {
 <body>
 <h1 id="message"></h1>
 <p id="status" style="color:red">&#11044; connection to server</p><button id="reconnect" onclick="reconnectToServer()">Reconnect</button>
+<b id="error" style="color:red"></b>
 <table>
 	<tr>
-		<td><input disabled id="textForWheel"></input><select disabled id="slotSelect"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></td>
-		<td><button disabled id="add" onclick="addToWheel()">Add to wheel</button><button disabled id="remove" onclick="removeFromWheel()">Remove from wheel</button></td>
+		<td><input disabled id="textForWheel" placeholder="Text to add"></input><input disabled id="slotSelect" size="4" placeholder="ID #"></input></td>
+		<td><button disabled id="add" onclick="addToWheel()">Add/Overwrite to wheel</button><button disabled id="remove" onclick="removeFromWheel()">Remove from wheel</button></td>
 	</tr>
 	<tr>
 		<td colspan="2"><button disabled id="spin" onclick="spinTheWheel()" height="400px">SPIN THAT WHEEL!</button></td>
 	</tr>
 </table>
 <p>Preview of wheel contents</p>
-<select disabled id="queue" size="8" width="500px">
-	<option id="wheel1">Not connected</option>
-	<option id="wheel2">Not connected</option>
-	<option id="wheel3">Not connected</option>
-	<option id="wheel4">Not connected</option>
-	<option id="wheel5">Not connected</option>
-	<option id="wheel6">Not connected</option>
-	<option id="wheel7">Not connected</option>
-	<option id="wheel8">Not connected</option>
+<select disabled id="contents" size="8" width="500px">
 </select></br>
 <b id="lastSpun">Previous spin result will show here</b>
 
 <script>
-	var wasUpdated = false;
-	var x = document.getElementById("queue");
+	var wheelPreview = document.getElementById("contents");
+	var pattern1 = "^sendtowheel ([0-9]+) (.*)";
+	var re1 = new RegExp(pattern1,'i');
+	var pattern2 = "^wheelselected (.*)";
+	var re2 = new RegExp(pattern2,'i');
 	//create a new WebSocket object.
 	websocket = new WebSocket("ws://localhost:8080/");
 	function reconnectToServer() {
 		location.reload();
 	}
-	websocket.onopen = function() { 
+	function sortSelected(selElem) {
+    var tmpAry = new Array();
+    for (var i=0;i<selElem.options.length;i++) {
+        tmpAry[i] = new Array();
+        tmpAry[i][0] = parseInt(selElem.options[i].value);
+        tmpAry[i][1] = selElem.options[i].text;
+    }
+    tmpAry.sort(function (a, b) {
+	  return a[0] - b[0];
+	});
+    while (selElem.options.length > 0) {
+        selElem.options[0] = null;
+    }
+    for (var i=0;i<tmpAry.length;i++) {
+        var op = new Option(tmpAry[i][1], tmpAry[i][0]);
+		op.id = ("wheel"+tmpAry[i][0]);
+        selElem.options[i] = op;
+    }
+    return;
+	}
+	websocket.onopen = function() {
 		document.getElementById("status").style.color = "green";
 		websocket.send("requesting");
 		document.getElementById("add").disabled = false;
@@ -58,45 +85,31 @@ button {
 		document.getElementById("textForWheel").disabled = false;
 		document.getElementById("slotSelect").disabled = false;
 		document.getElementById("reconnect").classList.add("hidden");
-	}; 
+	};
 	websocket.onmessage = function(ev) {
-		if(ev.data.startsWith("sendtowheel ")) {
-			if(ev.data.startsWith("sendtowheel 1 ")) {
-				var formattedText = ev.data.replace("sendtowheel 1 ","");
-				document.getElementById("wheel1").innerHTML = formattedText;
-			} else if(ev.data.startsWith("sendtowheel 2 ")) {
-				var formattedText = ev.data.replace("sendtowheel 2 ","");
-				document.getElementById("wheel2").innerHTML = formattedText;
-			} else if(ev.data.startsWith("sendtowheel 3 ")) {
-				var formattedText = ev.data.replace("sendtowheel 3 ","");
-				document.getElementById("wheel3").innerHTML = formattedText;
-			} else if(ev.data.startsWith("sendtowheel 4 ")) {
-				var formattedText = ev.data.replace("sendtowheel 4 ","");
-				document.getElementById("wheel4").innerHTML = formattedText;
-			} else if(ev.data.startsWith("sendtowheel 5 ")) {
-				var formattedText = ev.data.replace("sendtowheel 5 ","");
-				document.getElementById("wheel5").innerHTML = formattedText;
-			} else if(ev.data.startsWith("sendtowheel 6 ")) {
-				var formattedText = ev.data.replace("sendtowheel 6 ","");
-				document.getElementById("wheel6").innerHTML = formattedText;
-			} else if(ev.data.startsWith("sendtowheel 7 ")) {
-				var formattedText = ev.data.replace("sendtowheel 7 ","");
-				document.getElementById("wheel7").innerHTML = formattedText;
-			} else if(ev.data.startsWith("sendtowheel 8 ")) {
-				var formattedText = ev.data.replace("sendtowheel 8 ","");
-				document.getElementById("wheel8").innerHTML = formattedText;
-			} else if(ev.data.startsWith("sendtowheel 9 ")) {
-				var formattedText = ev.data.replace("sendtowheel 9 ","");
-				document.getElementById("wheel9").innerHTML = formattedText;
-			} 
-		} else if (ev.data.startsWith("wheelselected ")) {
-			var formattedText = ev.data.replace("wheelselected ","Previous spin: ");
-			document.getElementById("lastSpun").innerHTML = formattedText;
-		} else {
-			
+		if (re1.test(ev.data)) {
+			var message = ev.data;
+			var matches = message.match(pattern1);
+			var element = document.getElementById('wheel'+matches[1]);
+			if (!element) {
+				var wheelItem = document.createElement("option");
+				wheelItem.id = "wheel"+matches[1];
+				wheelItem.innerHTML = "" + matches[1] + " | " + matches[2];
+				wheelItem.value = matches[1];
+				wheelPreview.add(wheelItem);
+				sortSelected(wheelPreview);
+			} else {
+				element.innerHTML = "" + matches[1] + " | " + matches[2];
+				sortSelected(wheelPreview);
+			}
+		};
+		if (re2.test(ev.data)) {
+			var message = ev.data;
+			var matches = message.match(pattern2);
+			document.getElementById("lastSpun").innerHTML = "Last spun: " + matches[1];
 		}
 	}
-	websocket.onclose = function() { 
+	websocket.onclose = function() {
 		document.getElementById("add").disabled = true;
 		document.getElementById("remove").disabled = true;
 		document.getElementById("spin").disabled = true;
@@ -105,26 +118,54 @@ button {
 		document.getElementById("queue").disabled = true;
 		document.getElementById("status").style.color = "red";
 		document.getElementById("reconnect").classList.remove("hidden");
-	}; 
+	};
 	function addToWheel() {
-		var content = document.getElementById("textForWheel").value;
-		var slotNo = document.getElementById("slotSelect").value;
-		var option = document.getElementById("wheel"+slotNo);
-		if(content != "") {
-			option.text = content;
-			websocket.send("addtogoalwheel "+slotNo+" "+content); //send method
-			document.getElementById('textForWheel').value = "";
-			wasUpdated = true;
+		if(!isNaN(document.getElementById("slotSelect").value) && document.getElementById("slotSelect").value > 0 && document.getElementById("textForWheel").value != "") {
+			var content = document.getElementById("textForWheel").value;
+			var slotNo = Math.floor(document.getElementById("slotSelect").value);
+			var element = document.getElementById('wheel'+slotNo);
+			if(!element) {
+				var wheelItem = document.createElement("option");
+				wheelItem.id = "wheel"+slotNo;
+				wheelItem.innerHTML = "" + slotNo + " | " + content;
+				wheelItem.value = slotNo;
+				wheelPreview.add(wheelItem);
+				sortSelected(wheelPreview);
+				websocket.send("addtogoalwheel "+slotNo+" "+content); //send method
+				document.getElementById('textForWheel').value = "";
+				document.getElementById('slotSelect').value = parseInt(document.getElementById('slotSelect').value) + 1;
+			} else {
+				element.innerHTML = "" + slotNo + " | " + content;
+				websocket.send("addtogoalwheel "+slotNo+" "+content); //send method
+				document.getElementById('textForWheel').value = "";
+				document.getElementById('slotSelect').value = parseInt(document.getElementById('slotSelect').value) + 1;
+			}
+		} else {
+			document.getElementById("error").innerHTML = "Error: Missing 'text to add'/'id number', or the id inserted is not an integer >0";
+			setTimeout(function() {
+				document.getElementById("error").innerHTML = "";
+			},5000);
 		}
 	}
 	function removeFromWheel() {
-		var slotNo = document.getElementById("slotSelect").value;
-		var option = document.getElementById("wheel"+slotNo);
-		option.text = "Nothing";
-		websocket.send("addtogoalwheel "+slotNo+" "+"Nothing"); //send method
+		if(!isNaN(document.getElementById("slotSelect").value) && document.getElementById("wheel"+document.getElementById("slotSelect").value) ) {
+			var slotNo = document.getElementById("slotSelect").value;
+			var option = document.getElementById("wheel"+slotNo);
+			option.remove(option.selectedIndex);
+			websocket.send("removefromwheel "+slotNo); //send method
+		} else {
+			document.getElementById("error").innerHTML = "Error: No number inserted to remove, or number inserted is not saved";
+			setTimeout(function() {
+				document.getElementById("error").innerHTML = "";
+			},5000);
+		}
 	}
 	function spinTheWheel() {
 		websocket.send("spin");
+		document.getElementById("spin").disabled = true;
+		setTimeout(function() {
+			document.getElementById("spin").disabled = false;
+		},8000);
 	}
 </script>
 </body>

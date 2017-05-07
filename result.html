@@ -1,5 +1,6 @@
 <html>
 <head>
+<title>MojoWheel output</title>
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 <style>
@@ -40,17 +41,23 @@ img {
 		<td style="height:53vh;width:9vw"><img src="bit.png"/></td>
 	</tr>
 </table>
-<!--<p id="status" style="color:red">&#11044; status</p>-->
 <script>
 var click = new Audio('spinningsound.ogg');
-var wheelArray = ["","","","","","","",""]
+var wheelArray = [];
+var pattern1 = "^sendtowheel ([0-9]+) (.*)";
+var re1 = new RegExp(pattern1,"i");
+var pattern2 = "^removefromwheel ([0-9]+)";
+var re2 = new RegExp(pattern2,"i");
+Array.prototype.insert = function ( index, item ) {
+    this.splice( index, 0, item );
+};
 //create a new WebSocket object.
-websocket = new WebSocket("ws://localhost:8080/"); 
-websocket.onopen = function() { 
+websocket = new WebSocket("ws://localhost:8080/");
+websocket.onopen = function() {
 	$('#table').fadeOut('slow');
 	websocket.send("requesting");
-}; 
-websocket.onclose = function() { 
+};
+websocket.onclose = function() {
 	$('#table').fadeIn('slow');
 	document.getElementById("selection").innerHTML = "LOST CONNECTION (REFRESHING)";
 	setTimeout(function() {
@@ -58,346 +65,330 @@ websocket.onclose = function() {
 	},25000)
 };
 websocket.onmessage = function(ev) {
-	if(ev.data.startsWith("sendtowheel ")) {
-		if(ev.data.startsWith("sendtowheel 1 ")) {
-			var formattedText = ev.data.replace("sendtowheel 1 ","");
-			wheelArray[0] = formattedText;
-		} else if(ev.data.startsWith("sendtowheel 2 ")) {
-			var formattedText = ev.data.replace("sendtowheel 2 ","");
-			wheelArray[1] = formattedText;
-		} else if(ev.data.startsWith("sendtowheel 3 ")) {
-			var formattedText = ev.data.replace("sendtowheel 3 ","");
-			wheelArray[2] = formattedText;
-		} else if(ev.data.startsWith("sendtowheel 4 ")) {
-			var formattedText = ev.data.replace("sendtowheel 4 ","");
-			wheelArray[3] = formattedText;
-		} else if(ev.data.startsWith("sendtowheel 5 ")) {
-			var formattedText = ev.data.replace("sendtowheel 5 ","");
-			wheelArray[4] = formattedText;
-		} else if(ev.data.startsWith("sendtowheel 6 ")) {
-			var formattedText = ev.data.replace("sendtowheel 6 ","");
-			wheelArray[5] = formattedText;
-		} else if(ev.data.startsWith("sendtowheel 7 ")) {
-			var formattedText = ev.data.replace("sendtowheel 7 ","");
-			wheelArray[6] = formattedText;
-		} else if(ev.data.startsWith("sendtowheel 8 ")) {
-			var formattedText = ev.data.replace("sendtowheel 8 ","");
-			wheelArray[7] = formattedText;
-		} 
-	} else if (ev.data.startsWith("spin")) {
-		websocket.send("requesting");
+	if (re1.test(ev.data)) {
+		var message = ev.data;
+		var matches = message.match(pattern1);
+		wheelArray.insert(matches[1], matches[2]);
+	};
+	if (re2.test(ev.data)) {
+		var message = ev.data;
+		var matches = message.match(pattern2);
+		var indexToRemove = wheelArray.indexOf(matches[1]);
+		wheelArray.splice(indexToRemove,1);
+	};
+	if (ev.data.startsWith("spin")) {
 		//begin insane animation spree
 		console.log(wheelArray);
 		$('#table').fadeIn('fast');
-		setTimeout(function() { 
+		setTimeout(function() {
 			selection = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			click.play();
-		},25); 
-		setTimeout(function() { 
+		},25);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},75); 
-		setTimeout(function() { 
+		},75);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},125); 
-		setTimeout(function() { 
+		},125);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},160); 
-		setTimeout(function() { 
+		},160);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},225); 
-		setTimeout(function() { 
+		},225);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},270); 
-		setTimeout(function() { 
+		},270);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},320); 
-		setTimeout(function() { 
+		},320);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},370); 
-		setTimeout(function() { 
+		},370);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},440); 
-		setTimeout(function() { 
+		},440);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},480); 
-		setTimeout(function() { 
+		},480);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},550); 
-		setTimeout(function() { 
+		},550);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},600); 
-		setTimeout(function() { 
+		},600);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},660); 
-		setTimeout(function() { 
+		},660);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},710); 
-		setTimeout(function() { 
+		},710);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},770); 		
-		setTimeout(function() { 
+		},770);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},830); 
-		setTimeout(function() { 
+		},830);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},890); 
-		setTimeout(function() { 
+		},890);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},950); 
-		setTimeout(function() { 
+		},950);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1020); 
-		setTimeout(function() { 
+		},1020);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1100); 
-		setTimeout(function() { 
+		},1100);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1150); 
-		setTimeout(function() { 
+		},1150);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1250); 
-		setTimeout(function() { 
+		},1250);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1300); 
-		setTimeout(function() { 
+		},1300);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1370); 
-		setTimeout(function() { 
+		},1370);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1450); 
-		setTimeout(function() { 
+		},1450);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1535); 
-		setTimeout(function() { 
+		},1535);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1600); 
-		setTimeout(function() { 
+		},1600);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1690); 
-		setTimeout(function() { 
+		},1690);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1780); 
-		setTimeout(function() { 
+		},1780);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1870); 
-		setTimeout(function() { 
+		},1870);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},1960); 
-		setTimeout(function() { 
+		},1960);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},2070); 
-		setTimeout(function() { 
+		},2070);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},2160); 
-		setTimeout(function() { 
+		},2160);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},2280); 
-		setTimeout(function() { 
+		},2280);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},2400); 
-		setTimeout(function() { 
+		},2400);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},2535); 
-		setTimeout(function() { 
+		},2535);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},2660); 
-		setTimeout(function() { 
+		},2660);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},2810); 
-		setTimeout(function() { 
+		},2810);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
 			} else {
 				document.getElementById("selection").style.fontSize = "24vh";
 			}
-		},3000);  
-		setTimeout(function() { 
+		},3000);
+		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 			if(document.getElementById("selection").innerHTML.length > 25) {
 				document.getElementById("selection").style.fontSize = "14vh";
@@ -406,10 +397,10 @@ websocket.onmessage = function(ev) {
 			}
 			var selection = document.getElementById("selection").innerHTML;
 			websocket.send("wheelselected "+selection);
-		},3200);  
-		setTimeout(function() { 
+		},3200);
+		setTimeout(function() {
 			$('#table').fadeOut('slow');
-		},7200); 
+		},7200);
 	}
 }
 </script>
