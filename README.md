@@ -23,4 +23,8 @@ To start the server run ``node server.js`` or ``npm start``
 
 * Select item via preview list instead of typing id
 * Toggles (Mute wheel)
-* Import list
+* Import lists
+* Color chooser for background of spinner
+* Upload to change image on spinner (replace 100 bits)
+* Reset to default button
+* Merge distribution w/ master
