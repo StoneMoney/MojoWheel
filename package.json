@@ -1,0 +1,20 @@
+{
+  "name": "mojowheel-distributable",
+  "version": "1.1.0",
+  "description": "Spin the wheel!",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "repository": "",
+  "keywords": [],
+  "author": "ngiano",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "fs-extra": "^3.0.1",
+    "glob": "^7.1.1",
+    "opn": "^5.0.0",
+    "ws": "^2.3.1"
+  }
+}
