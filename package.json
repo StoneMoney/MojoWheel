@@ -1,17 +1,21 @@
 {
   "name": "mojowheel",
   "version": "1.1.0",
-  "description": "Websocket wheel spinner. Great for streaming overlays",
-  "main": "server.js",
-  "dependencies": {
-    "ws": "^2.2.3",
-	"glob":"^7.1.1"
-  },
-  "devDependencies": {},
+  "description": "Spin the wheel!",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node main.js"
   },
-  "author": "stonemoney",
-  "license": "MIT"
+  "repository": "",
+  "keywords": [],
+  "author": "ngiano",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "fs-extra": "^3.0.1",
+    "glob": "^7.1.1",
+    "opn": "^5.0.0",
+    "ws": "^2.3.1",
+	"pkg": "^3.0.3"
+  }
 }

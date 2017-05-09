@@ -17,14 +17,15 @@ Results.html is front-end visual graphics of the wheel including sound and anima
 
 Server.js is the websocket server which passes along the strings, and also stores them locally. Runs default on port 8080
 
-To start the server run ``node server.js`` or ``npm start``
+To start the server run ``node main.js`` or ``npm start``
+
+To compile the server into an exe: ``pkg --output MojoWheel.exe --targets node6-win-x86 main.js``
 
 ## Todo & Future features
-
+* macOS & Linux support
 * Select item via preview list instead of typing id
 * Toggles (Mute wheel)
 * Import lists
 * Color chooser for background of spinner
 * Upload to change image on spinner (replace 100 bits)
 * Reset to default button
-* Merge distribution w/ master

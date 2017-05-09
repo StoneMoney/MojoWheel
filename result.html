@@ -4,10 +4,6 @@
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 <style>
-@font-face {
-    font-family: "Open Sans";
-    src: url(fonts/OpenSans.ttf) format("truetype");
-}
 .hidden {
 	visibility:hidden;
 }
@@ -16,7 +12,7 @@ table {
 	height:90vh;
 	background-color:#6441A4;
 	text-align:center;
-	font-family:'Open Sans',sans-serif;
+	font-family:sans-serif;
 	font-weight:bold;
 	color:#3b3b3b;
 	border-width: 8px;
@@ -33,12 +29,12 @@ img {
 <body>
 <table id="table">
 	<tr style="height:17vh;	font-size:15vh;">
-		<td colspan="3">SPINNING WHEEL...</td>
+		<td rowspan="2" style="height:53vh;width:9vw"><img src="bit.png"/></td>
+		<td>SPINNING WHEEL...</td>
+		<td rowspan="2" style="height:53vh;width:9vw"><img src="bit.png"/></td>
 	</tr>
 	<tr>
-		<td style="height:53vh;width:9vw"><img src="bit.png"/></td>
 		<td id="selection" style="height:53vh;width:80vw;font-size:24vh;color:white;text-shadow: 3px 3px black">NO CONNECTION</td>
-		<td style="height:53vh;width:9vw"><img src="bit.png"/></td>
 	</tr>
 </table>
 <script>
