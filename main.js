@@ -1,36 +1,48 @@
 console.log("Running! Close this window or press Ctrl+C when you are finished");
-const WebSocket = require('ws');
+//node-modules
+const http = require('http'),
+    //fs = require('fs'),
+	WebSocket = require('ws'),
+	path = require("path"),
+	fs = require('fs-extra'),
+	opn = require("opn"),
+	glob = require("glob"),
+	jsonfile = require("jsonfile");
 const wss = new WebSocket.Server({ port: 8080 });
-var http = require('http'),
-    fs = require('fs');
-//host controller on port 8000
-var path = require("path");
+//paths for required files
 var index = path.join(__dirname, '/index.html')
 var result = path.join(__dirname, '/result.html')
 var bitsImage = path.join(__dirname, '/bit.png')
 var spinSound = path.join(__dirname, '/spinningsound.ogg')
-//fs
+var config = path.join(__dirname, '/config.JSON')
+//app workspace
 const baseFolder = process.env.APPDATA+'\\MojoWheel';
 const dataFolder = process.env.APPDATA+'\\MojoWheel\\data';
-var fs = require('fs-extra');
+//create folders for workspace, if they don't exist already
 if (!fs.existsSync(baseFolder)){
     fs.mkdirSync(baseFolder);
 }
 if (!fs.existsSync(dataFolder)){
     fs.mkdirSync(dataFolder);
 }
-//glob
-var glob = require("glob");
-//opn
-var opn = require("opn");
 //regex
 var pattern1 = "^addtogoalwheel ([0-9]+) (.*)";
 var re1 = new RegExp(pattern1,'i');
 var pattern2 = "^removefromwheel ([0-9]+)";
 var re2 = new RegExp(pattern2,'i');
-fs.copySync(result,baseFolder+'/result.html'); //only for compiler
+var pattern3 = "^config ([a-z]+) (.*)";
+var re3 = new RegExp(pattern3,'i');
+//send local copies of files to workspace
+fs.copySync(result,baseFolder+'/result.html');
 fs.copySync(spinSound,baseFolder+'/spinningsound.ogg');
 fs.copySync(bitsImage,baseFolder+'/bit.png');
+function restoreToDefault() {
+	fs.copySync(config,baseFolder+'/config.JSON'); //protect file from overwriting each time exe is ran
+}
+if(!fs.existsSync(baseFolder+"/config.JSON")) { //check if config file exists
+	restoreToDefault();
+}
+//hosting index.html on localhost:8000 instead of also moving it to workspace
 fs.readFile(index, function (err, html) {
     if (err) {
         throw err; 
@@ -41,6 +53,7 @@ fs.readFile(index, function (err, html) {
         response.end();  
     }).listen(8000);
 });
+//open localhost:8000 in default browser
 opn('http://localhost:8000');
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
@@ -75,10 +88,67 @@ wss.on('connection', function connection(ws) {
 			client.send("location "+baseFolder);
 		});
 	}
+	if(message == "wheel-requesting") {
+		sendConfig();
+		glob(dataFolder+"/wheel-*.txt", function (er, files) {
+			files.forEach(function(matchingFile) {
+					fs.readFile(matchingFile, 'utf8', function(err, data){
+						if(!err) {
+							matchingFile = matchingFile.replace(/\//g,'\\'); //make sure consistant with entire program
+							var step1 = matchingFile.replace(dataFolder+"\\wheel-","");
+							var itemNo = step1.replace(".txt","");
+							wss.clients.forEach(function each(client) {
+								client.send("sendtowheel "+itemNo+" "+data);
+							});
+						}
+					});
+			});
+		});
+		wss.clients.forEach(function each(client) {
+			client.send("location "+baseFolder);
+		});
+	}
+	if(message == "restoretodefault") {
+		restoreToDefault();
+		sendConfig();
+	}
+	if(message == "config-request") {
+		sendConfig();
+	}
+	if(re3.test(message)) {
+		var matches = message.match(pattern3);  
+		replaceConfigString(matches[1],matches[2]);
+	}
 	wss.clients.forEach(function each(client) {
 		if (client !== ws && client.readyState === WebSocket.OPEN) {
 				client.send(message);
 		}
 	});
-  });
+	});
+	function replaceConfigString(configOption, message) {
+		jsonfile.readFile(baseFolder+"/config.JSON", function (err,obj) {
+			try {
+				for (var i=0; i< obj.length; i++) {
+					if (obj[i]['config'] == configOption) {
+						obj[i]['theOption'] = message;
+						jsonfile.writeFileSync(baseFolder+"/config.JSON", obj);
+						break;
+					}
+				}
+			} catch(err) {
+				
+			}
+		});
+	}
+	function sendConfig() {
+		jsonfile.readFile(baseFolder+"/config.JSON", function (err,obj) {
+				wss.clients.forEach(function each(client) {
+					for (var i=0; i< obj.length; i++) {
+						var configOption = obj[i]['config'];
+						var message = obj[i]['theOption'];
+						client.send("config "+configOption+" "+message);
+					}
+				});
+		});
+	}
 });

@@ -29,9 +29,9 @@ img {
 <body>
 <table id="table">
 	<tr style="height:17vh;	font-size:15vh;">
-		<td rowspan="2" style="height:53vh;width:9vw"><img src="bit.png"/></td>
-		<td>SPINNING WHEEL...</td>
-		<td rowspan="2" style="height:53vh;width:9vw"><img src="bit.png"/></td>
+		<td rowspan="2" style="height:53vh;width:9vw"><img id="sideimages1" src="bit.png"/></td>
+		<td id="infotext">SPINNING WHEEL...</td>
+		<td rowspan="2" style="height:53vh;width:9vw"><img id="sideimages2" src="bit.png"/></td>
 	</tr>
 	<tr>
 		<td id="selection" style="height:53vh;width:80vw;font-size:24vh;color:white;text-shadow: 3px 3px black">NO CONNECTION</td>
@@ -39,6 +39,13 @@ img {
 </table>
 <script>
 var click = new Audio('spinningsound.ogg');
+var isSpinning = false;
+var playsound = true;
+var showprice = false;
+var theprice = "100 bits";
+var onscreenprice = "10";
+var cooldownprice = "1";
+var sideimage = "bit.png";
 var wheelArray = {};
 Array.prototype.removeValue = function(name, value){
    var array = $.map(this, function(v,i){
@@ -49,10 +56,30 @@ Array.prototype.removeValue = function(name, value){
 }
 var pattern1 = "^sendtowheel ([0-9]+) (.*)";
 var re1 = new RegExp(pattern1,"i");
+var pattern2 = "^config ([A-Z]+|[a-z]+) (.*)";
+var re2 = new RegExp(pattern2,"i");
 //create a new WebSocket object.
+function updateInterval() {
+	clearInterval()
+	setInterval(function() {
+		if(showprice && !isSpinning) {
+			$('#table').fadeIn('slow');
+			document.getElementById("selection").innerHTML = "for "+theprice+"!";
+			document.getElementById("infotext").innerHTML = "SPIN THE WHEEL...";
+			setTimeout(function() {
+				$('#table').fadeOut('slow');
+				document.getElementById("infotext").innerHTML = "SPINNING WHEEL...";
+			},(parseInt(onscreenprice)*1000));
+		}
+	},(parseInt(onscreenprice)*6000));
+}
 websocket = new WebSocket("ws://localhost:8080/");
 websocket.onopen = function() {
 	$('#table').fadeOut('slow');
+	websocket.send("config-request");
+	setTimeout(function() {
+		updateInterval();
+	},300);
 };
 websocket.onclose = function() {
 	$('#table').fadeIn('slow');
@@ -67,18 +94,65 @@ websocket.onmessage = function(ev) {
 		var matches = message.match(pattern1);
 		wheelArray.push(matches[2]);
 	};
+	if (re2.test(ev.data)) {
+		var message = ev.data;
+		var matches = message.match(pattern2);
+		console.log(matches);
+		if(matches[1]=="backgroundcolor") {
+			try {
+				document.getElementById("table").style.backgroundColor = matches[2];
+			} catch(err) {
+				console.log("Color application failed!")
+			}
+		} else if (matches[1]=="textcolor") {
+			try {
+				document.getElementById("table").style.color = matches[2];
+			} catch(err) {
+				console.log("Color application failed!")
+			}
+		} else if (matches[1]=="playsound") {
+			if(matches[2] == "true") {
+				playsound = true
+			} else if (matches[2] == "false") {
+				playsound = false
+			}
+		} else if (matches[1]=="sideimage") {
+			try {
+				document.getElementById("sideimages1").src = matches[2];
+				document.getElementById("sideimages2").src = matches[2];
+			} catch(err) {
+				console.log(err);
+			}
+		} else if (matches[1]=="showprice") {
+			if(matches[2] == "true") {
+				showprice = true
+			} else if (matches[2] == "false") {
+				showprice = false
+			}
+		} else if (matches[1]=="theprice") {
+			theprice = matches[2]
+		} else if (matches[1]=="cooldownprice") {
+			cooldownprice = matches[2]
+			updateInterval();
+		} else if (matches[1]=="onscreenprice") {
+			onscreenprice = matches[2]
+		}
+	};
 	if (ev.data.startsWith("spin")) {
 		var finalSelection;
 		//begin insane animation spree
 		wheelArray=[];
-		websocket.send("requesting");
+		websocket.send("wheel-requesting");
 		$('#table').fadeIn('fast');
 		setTimeout(function() {
 			finalSelection = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 		},10);
 		setTimeout(function() {
 			document.getElementById('selection').innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			click.play();
+			isSpinning = true;
+			if(playsound) {
+				click.play();
+			}
 		},25);
 		setTimeout(function() {
 			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
@@ -395,6 +469,7 @@ websocket.onmessage = function(ev) {
 		},3200);
 		setTimeout(function() {
 			$('#table').fadeOut('slow');
+			isSpinning = false;
 		},7200);
 	}
 }

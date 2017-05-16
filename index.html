@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>MojoWheel v1.1</title>
+<title>MojoWheel v1.2</title>
 <style>
 h1, p, b, button {
 	font-family:sans-serif;
@@ -42,6 +42,48 @@ button {
 <select disabled id="contents" size="8" width="500px">
 </select></br>
 <b id="lastSpun">Previous spin result will show here</b>
+<p>Customization settings. See <a href="https://github.com/StoneMoney/MojoWheel/wiki">wiki</a> for more in-depth descriptions</p>
+<table border="1px">
+	<tr>
+		<td><input disabled id="backgroundcolor" placeholder="Color"></input></td>
+		<td>Background color of wheel when running</td>
+	</tr>
+	<tr>
+		<td><input disabled id="textcolor" placeholder="Color"></input></td>
+		<td>Text & border color of wheel when running</td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" disabled id="playsound" placeholder="Color"></input></td>
+		<td>Play sound effect on spin</td>
+	</tr>
+	<tr>
+		<td><input disabled id="sideimage" placeholder="Image URL"></input></td>
+		<td>Images on both sides of wheel when spinning</td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" disabled id="showprice" placeholder="Image URL"></input></td>
+		<td>Enable function to alert (advertise) the price of spinning the wheel from within the program</td>
+	</tr>
+	<tr>
+		<td><input disabled id="theprice" placeholder="Price"></input></td>
+		<td>Text that will display as price. ex) 50 bits, $1 tip</td>
+	</tr>
+	<tr>
+		<td><input disabled id="cooldownprice" placeholder="Minutes"></input></td>
+		<td>Time, in minutes, it should wait before showing alert again</td>
+	</tr>
+	<tr>
+		<td><input disabled id="onscreenprice" placeholder="Seconds"></input></td>
+		<td>Time, in seconds, that the alert should stay on screen</td>
+	</tr>
+</table>
+<table>
+	<tr>
+		<td><button disabled id="loadConfig" onclick="loadConfig()" height="400px">Load current options</button></td>
+		<td><button disabled id="saveConfig" onclick="saveConfig()" height="400px">Save current options</button></td>
+		<td><button disabled id="defaultConfig" onclick="defaultConfig()" height="400px">Restore to default</button></td>
+	</tr>
+</table>
 <script>
 	var wheelPreview = document.getElementById("contents");
 	var pattern1 = "^sendtowheel ([0-9]+) (.*)";
@@ -50,6 +92,8 @@ button {
 	var re2 = new RegExp(pattern2,'i');
 	var pattern3 = "^location (.*)";
 	var re3 = new RegExp(pattern3,'i');
+	var pattern4 = "^config ([A-Z]+|[a-z]+) (.*)";
+	var re4 = new RegExp(pattern4,'i');
 	//create a new WebSocket object.
 	websocket = new WebSocket("ws://localhost:8080/");
 	function reconnectToServer() {
@@ -76,6 +120,7 @@ button {
     return;
 	}
 	websocket.onopen = function() {
+		websocket.send("config-request");
 		document.getElementById("status").style.color = "green";
 		websocket.send("requesting");
 		document.getElementById("add").disabled = false;
@@ -84,6 +129,17 @@ button {
 		document.getElementById("textForWheel").disabled = false;
 		document.getElementById("slotSelect").disabled = false;
 		document.getElementById("reconnect").classList.add("hidden");
+		document.getElementById("backgroundcolor").disabled = false;
+		document.getElementById("textcolor").disabled = false;
+		document.getElementById("playsound").disabled = false;
+		document.getElementById("theprice").disabled = false;
+		document.getElementById("showprice").disabled = false;
+		document.getElementById("cooldownprice").disabled = false;
+		document.getElementById("onscreenprice").disabled = false;
+		document.getElementById("sideimage").disabled = false;
+		document.getElementById("loadConfig").disabled = false;
+		document.getElementById("saveConfig").disabled = false;
+		document.getElementById("defaultConfig").disabled = false;
 	};
 	websocket.onmessage = function(ev) {
 		if (re1.test(ev.data)) {
@@ -112,6 +168,17 @@ button {
 			var matches = message.match(pattern3);
 			document.getElementById("location").innerHTML = "XSPLIT: "+matches[1] +"\\result.html "+"\n"+" OBS: file:///"+matches[1]+"\\result.html";
 		}
+		if (re4.test(ev.data)) {
+			var message = ev.data;
+			var matches = message.match(pattern4);
+			if(matches[2] == "true") {
+				document.getElementById((matches[1].toLowerCase())).checked = true;
+			} else if (matches[2] == "false") {
+				document.getElementById((matches[1].toLowerCase())).checked = false;
+			} else {
+				document.getElementById((matches[1].toLowerCase())).value = matches[2];
+			}
+		}
 	}
 	websocket.onclose = function() {
 		document.getElementById("add").disabled = true;
@@ -119,9 +186,19 @@ button {
 		document.getElementById("spin").disabled = true;
 		document.getElementById("textForWheel").disabled = true;
 		document.getElementById("slotSelect").disabled = true;
-		document.getElementById("queue").disabled = true;
 		document.getElementById("status").style.color = "red";
 		document.getElementById("reconnect").classList.remove("hidden");
+		document.getElementById("backgroundcolor").disabled = true;
+		document.getElementById("textcolor").disabled = true;
+		document.getElementById("playsound").disabled = true;
+		document.getElementById("theprice").disabled = true;
+		document.getElementById("cooldownprice").disabled = true;
+		document.getElementById("onscreenprice").disabled = true;
+		document.getElementById("sideimage").disabled = true;
+		document.getElementById("loadConfig").disabled = true;
+		document.getElementById("saveConfig").disabled = true;
+		document.getElementById("defaultConfig").disabled = true;
+		document.getElementById("showprice").disabled = true;
 	};
 	function addToWheel() {
 		if(!isNaN(document.getElementById("slotSelect").value) && document.getElementById("slotSelect").value > 0 && document.getElementById("textForWheel").value != "") {
@@ -170,6 +247,82 @@ button {
 		setTimeout(function() {
 			document.getElementById("spin").disabled = false;
 		},8000);
+	}
+	function defaultConfig() {
+		if(confirm("Restore all customization settings to default?") == true) {
+			websocket.send("restoretodefault");
+			document.getElementById("defaultConfig").disabled = true;
+			setTimeout(function() {
+				document.getElementById("defaultConfig").disabled = false;
+			},25000);
+		}
+	}
+	function saveConfig() {
+		setTimeout(function() {
+			if(document.getElementById("backgroundcolor").value != "") {
+				websocket.send("config backgroundcolor "+document.getElementById("backgroundcolor").value);
+			}
+		},100);
+		setTimeout(function() {
+			if(document.getElementById("textcolor").value != "") {
+				websocket.send("config textcolor "+document.getElementById("textcolor").value);
+			}
+		},150);
+		setTimeout(function() {
+			if(document.getElementById("playsound").checked) {
+				websocket.send("config playsound true");
+			} else {
+				websocket.send("config playsound false");
+			}
+		},200);
+		setTimeout(function() {
+			if(document.getElementById("sideimage").value != "") {
+				websocket.send("config sideimage "+document.getElementById("sideimage").value);
+			}
+		},250);
+		setTimeout(function() {
+			if(document.getElementById("showprice").checked) {
+				websocket.send("config showprice true");
+			} else {
+				websocket.send("config showprice false");
+			}
+		},300);
+		setTimeout(function() {
+			if(document.getElementById("theprice").value != "") {
+				websocket.send("config theprice "+document.getElementById("theprice").value);
+			}
+		},350);
+		setTimeout(function() {
+			if(document.getElementById("cooldownprice").value != "" && !isNaN(document.getElementById("cooldownprice").value) ) {
+				websocket.send("config cooldownprice "+document.getElementById("cooldownprice").value);
+			}
+		},400);
+		setTimeout(function() {
+			if(document.getElementById("onscreenprice").value != "" && !isNaN(document.getElementById("onscreenprice").value) ) {
+				websocket.send("config onscreenprice "+document.getElementById("onscreenprice").value);
+			}
+		},450);
+		document.getElementById("saveConfig").disabled = true;
+		setTimeout(function() {
+			document.getElementById("saveConfig").disabled = false;
+		},25000);
+	}
+	function loadConfig() {
+		websocket.send("config-request");
+		document.getElementById("loadConfig").disabled = true;
+		setTimeout(function() {
+			document.getElementById("loadConfig").disabled = false;
+		},25000);
+	}
+	//check if checkbox is checked and connection is established
+	if(document.getElementById("showprice") && document.getElementById("status").style.color == "green") {
+		document.getElementById("theprice").disabled = false;
+		document.getElementById("cooldownprice").disabled = false;
+		document.getElementById("onscreenprice").disabled = false;
+	} else {
+		document.getElementById("theprice").disabled = true;
+		document.getElementById("cooldownprice").disabled = true;
+		document.getElementById("onscreenprice").disabled = true;
 	}
 </script>
 </body>
