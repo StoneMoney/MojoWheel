@@ -24,8 +24,4 @@ To compile the server into an exe: ``pkg --output MojoWheel.exe --targets node6-
 ## Todo & Future features
 * macOS & Linux support
 * Select item via preview list instead of typing id
-* Toggles (Mute wheel)
 * Import lists
-* Color chooser for background of spinner
-* Upload to change image on spinner (replace 100 bits)
-* Reset to default button
