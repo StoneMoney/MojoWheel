@@ -107,14 +107,14 @@ websocket.onopen = function() {
 		updateInterval();
 	},300);
 };
-//websocket.onclose = function() {
-//	$('#table').fadeIn('slow');
-//  document.getElementById("selectionSpot").classList.remove("hidden");
-//	document.getElementById("selectionSpot").innerHTML = "LOST CONNECTION (REFRESHING)";
-//	setTimeout(function() {
-//		location.reload();
-//	},25000)
-//};
+websocket.onclose = function() {
+	$('#table').fadeIn('slow');
+  document.getElementById("selectionSpot").classList.remove("hidden");
+	document.getElementById("selectionSpot").innerHTML = "LOST CONNECTION (REFRESHING)";
+	setTimeout(function() {
+		location.reload();
+	},25000)
+};
 function getRandomItem() { return wheelArray[Math.floor(Math.random() * wheelArray.length)] }
 websocket.onmessage = function(ev) {
 	if (re1.test(ev.data)) {
