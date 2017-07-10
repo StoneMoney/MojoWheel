@@ -20,10 +20,33 @@ table {
 	border-style:solid;
 	border-color:#3b3b3b;
 }
+#selection {
+	position: relative;
+}
 img {
 	width: 100%;
 	height: auto;
 }
+.slide-up {
+  width:100%;
+  height:53vh;
+  overflow:hidden;
+}
+.slide-up div {
+  animation: 4.5s slide-up;
+  animation-fill-mode: forwards;
+  top:0px;
+}
+
+@keyframes slide-up {
+  from {
+    top: 0px;
+  }
+
+  to {
+    top: -550vh;
+  }
+ }
 </style>
 </head>
 <body>
@@ -34,7 +57,9 @@ img {
 		<td rowspan="2" style="height:53vh;width:9vw"><img id="sideimages2" src="bit.png"/></td>
 	</tr>
 	<tr>
-		<td id="selection" style="height:53vh;width:80vw;font-size:24vh;color:white;text-shadow: 3px 3px black">NO CONNECTION</td>
+		<td id="selectionSpot" style="height:53vh;width:80vw;font-size:24vh;color:white;text-shadow: 3px 3px black">
+			NO CONNECTION
+		</td>
 	</tr>
 </table>
 <script>
@@ -47,6 +72,7 @@ var onscreenprice = "10";
 var cooldownprice = "1";
 var sideimage = "bit.png";
 var wheelArray = {};
+var oldSchoolAnimation = false;
 Array.prototype.removeValue = function(name, value){
    var array = $.map(this, function(v,i){
       return v[name] === value ? null : v;
@@ -64,14 +90,14 @@ function updateInterval() {
 	setInterval(function() {
 		if(showprice && !isSpinning) {
 			$('#table').fadeIn('slow');
-			document.getElementById("selection").innerHTML = "for "+theprice+"!";
+			document.getElementById("selectionSpot").innerHTML = "for "+theprice+"!";
 			document.getElementById("infotext").innerHTML = "SPIN THE WHEEL...";
 			setTimeout(function() {
 				$('#table').fadeOut('slow');
 				document.getElementById("infotext").innerHTML = "SPINNING WHEEL...";
 			},(parseInt(onscreenprice)*1000));
 		}
-	},(parseInt(onscreenprice)*6000));
+	},(parseInt(onscreenprice)*60000));
 }
 websocket = new WebSocket("ws://localhost:8080/");
 websocket.onopen = function() {
@@ -81,13 +107,15 @@ websocket.onopen = function() {
 		updateInterval();
 	},300);
 };
-websocket.onclose = function() {
-	$('#table').fadeIn('slow');
-	document.getElementById("selection").innerHTML = "LOST CONNECTION (REFRESHING)";
-	setTimeout(function() {
-		location.reload();
-	},25000)
-};
+//websocket.onclose = function() {
+//	$('#table').fadeIn('slow');
+//  document.getElementById("selectionSpot").classList.remove("hidden");
+//	document.getElementById("selectionSpot").innerHTML = "LOST CONNECTION (REFRESHING)";
+//	setTimeout(function() {
+//		location.reload();
+//	},25000)
+//};
+function getRandomItem() { return wheelArray[Math.floor(Math.random() * wheelArray.length)] }
 websocket.onmessage = function(ev) {
 	if (re1.test(ev.data)) {
 		var message = ev.data;
@@ -136,6 +164,12 @@ websocket.onmessage = function(ev) {
 			updateInterval();
 		} else if (matches[1]=="onscreenprice") {
 			onscreenprice = matches[2]
+		} else if (matches[1]=="oldschoolanimation") {
+			if(matches[2] == "true") {
+				oldSchoolAnimation = true
+			} else if (matches[2] == "false") {
+				oldSchoolAnimation = false
+			}
 		}
 	};
 	if (ev.data.startsWith("spin")) {
@@ -147,330 +181,366 @@ websocket.onmessage = function(ev) {
 		setTimeout(function() {
 			finalSelection = wheelArray[Math.floor(Math.random() * wheelArray.length)];
 		},10);
-		setTimeout(function() {
-			document.getElementById('selection').innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+		if(oldSchoolAnimation) {
+			setTimeout(function() {
+				document.getElementById('selectionSpot').innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				isSpinning = true;
+				document.getElementById("selectionSpot").classList.remove("hidden");
+				if(playsound) {
+					click.play();
+				}
+			},25);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},75);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},125);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},160);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},225);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},270);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},320);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},370);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},440);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},480);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},550);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},600);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},660);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},710);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},770);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},830);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},890);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},950);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1020);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1100);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1150);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1250);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1300);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1370);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1450);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1535);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1600);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1690);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1780);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1870);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},1960);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},2070);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},2160);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},2280);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},2400);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},2535);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},2660);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},2810);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+			},3000);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = finalSelection;
+				if(document.getElementById("selectionSpot").innerHTML.length > 25) {
+					document.getElementById("selectionSpot").style.fontSize = "14vh";
+				} else {
+					document.getElementById("selectionSpot").style.fontSize = "24vh";
+				}
+				websocket.send("wheelselected "+finalSelection);
+			},3200);
+			setTimeout(function() {
+				$('#table').fadeOut('slow');
+				isSpinning = false;
+				document.getElementById("selectionSpot").classList.add("hidden");
+			},7200);
+		} else {
+			setTimeout(function() { 
+			var loopCount = 1;
+			var displayHTML = "";
+			for(loopCount;loopCount<= 18;loopCount++) {
+				var randomItem = getRandomItem();
+				if(randomItem.length > 20) {
+					displayHTML = displayHTML + "<div style='font-size:14vh;height:27vh;vertical-align:center;'>"+randomItem+"</div>"
+				} else {
+					displayHTML = displayHTML + "<div style='font-size:24vh'>"+randomItem+"</div>"
+				}
+				if(loopCount==18) {
+					document.getElementById("selectionSpot").innerHTML = "<div class='slide-up'><div id='selection'>"+displayHTML+"<br><br>"+finalSelection+"</div></div>"
+					document.getElementById("selectionSpot").classList.remove("hidden");
+					//document.getElementById("animate").classList.add("slide-up");
+				}
+			}
 			isSpinning = true;
 			if(playsound) {
 				click.play();
 			}
-		},25);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},75);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},125);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},160);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},225);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},270);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},320);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},370);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},440);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},480);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},550);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},600);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},660);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},710);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},770);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},830);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},890);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},950);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1020);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1100);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1150);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1250);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1300);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1370);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1450);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1535);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1600);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1690);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1780);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1870);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},1960);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},2070);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},2160);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},2280);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},2400);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},2535);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},2660);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},2810);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-		},3000);
-		setTimeout(function() {
-			document.getElementById("selection").innerHTML = finalSelection;
-			if(document.getElementById("selection").innerHTML.length > 25) {
-				document.getElementById("selection").style.fontSize = "14vh";
-			} else {
-				document.getElementById("selection").style.fontSize = "24vh";
-			}
-			websocket.send("wheelselected "+finalSelection);
-		},3200);
-		setTimeout(function() {
-			$('#table').fadeOut('slow');
-			isSpinning = false;
-		},7200);
+			},25);
+			setTimeout(function() {
+				document.getElementById("selectionSpot").innerHTML = finalSelection;
+			},5100);
+			setTimeout(function() {
+				$('#table').fadeOut('slow');
+				document.getElementById("selectionSpot").innerHTML = "";
+				document.getElementById("selectionSpot").classList.add("hidden");
+				isSpinning = false;
+				websocket.send("wheelselected "+finalSelection);
+			},7200);
+		}
 	}
 }
 </script>

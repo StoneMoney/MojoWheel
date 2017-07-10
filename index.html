@@ -31,19 +31,34 @@ button {
 <p id="error" style="color:red"></p>
 <table>
 	<tr>
+		<td colspan="2">
+			<select id="contents" onChange="contentsChange()" size="8"></select>
+			</br>
+        </td>
+	</tr>
+	<tr>
 		<td><input disabled id="textForWheel" placeholder="Text to add"></input><input disabled id="slotSelect" size="4" placeholder="ID #"></input></td>
 		<td><button disabled id="add" onclick="addToWheel()">Add/Overwrite to wheel</button><button disabled id="remove" onclick="removeFromWheel()">Remove from wheel</button></td>
 	</tr>
 	<tr>
 		<td colspan="2"><button disabled id="spin" onclick="spinTheWheel()" height="400px">SPIN THAT WHEEL!</button></td>
 	</tr>
+	<tr>
+		<td colspan="2">
+			<b id="lastSpun">Previous spin result will show here</b>
+		</td>
+	</tr>
 </table>
-<p>Preview of wheel contents</p>
-<select disabled id="contents" size="8" width="500px">
-</select></br>
-<b id="lastSpun">Previous spin result will show here</b>
 <p>Customization settings. See <a href="https://github.com/StoneMoney/MojoWheel/wiki">wiki</a> for more in-depth descriptions</p>
 <table border="1px">
+	<tr>
+		<td><input type="checkbox" disabled id="oldschoolanimation" placeholder="Color"></input></td>
+		<td>Enable to revert to basic spinning animation</td>
+	</tr>
+	<tr>
+		<td><input disabled id="backgroundcolor" placeholder="Color"></input></td>
+		<td>Background color of wheel when running</td>
+	</tr>
 	<tr>
 		<td><input disabled id="backgroundcolor" placeholder="Color"></input></td>
 		<td>Background color of wheel when running</td>
@@ -119,6 +134,9 @@ button {
     }
     return;
 	}
+	function contentsChange() {
+		document.getElementById("slotSelect").value = wheelPreview.value;
+	}
 	websocket.onopen = function() {
 		websocket.send("config-request");
 		document.getElementById("status").style.color = "green";
@@ -140,6 +158,7 @@ button {
 		document.getElementById("loadConfig").disabled = false;
 		document.getElementById("saveConfig").disabled = false;
 		document.getElementById("defaultConfig").disabled = false;
+		document.getElementById("oldschoolanimation").disabled = false;
 	};
 	websocket.onmessage = function(ev) {
 		if (re1.test(ev.data)) {
@@ -199,6 +218,7 @@ button {
 		document.getElementById("saveConfig").disabled = true;
 		document.getElementById("defaultConfig").disabled = true;
 		document.getElementById("showprice").disabled = true;
+		document.getElementById("oldschoolanimation").disabled = true;
 	};
 	function addToWheel() {
 		if(!isNaN(document.getElementById("slotSelect").value) && document.getElementById("slotSelect").value > 0 && document.getElementById("textForWheel").value != "") {
@@ -302,6 +322,13 @@ button {
 				websocket.send("config onscreenprice "+document.getElementById("onscreenprice").value);
 			}
 		},450);
+				setTimeout(function() {
+			if(document.getElementById("oldschoolanimation").checked) {
+				websocket.send("config oldschoolanimation true");
+			} else {
+				websocket.send("config oldschoolanimation false");
+			}
+		},500);
 		document.getElementById("saveConfig").disabled = true;
 		setTimeout(function() {
 			document.getElementById("saveConfig").disabled = false;

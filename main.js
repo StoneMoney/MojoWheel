@@ -1,4 +1,4 @@
-console.log("Running! Close this window or press Ctrl+C when you are finished");
+console.log("Running MOJOWHEEL [@ngiano]! Close this window or press Ctrl+C when you are finished");
 //node-modules
 const http = require('http'),
     //fs = require('fs'),
@@ -14,7 +14,7 @@ var index = path.join(__dirname, '/index.html')
 var result = path.join(__dirname, '/result.html')
 var bitsImage = path.join(__dirname, '/bit.png')
 var spinSound = path.join(__dirname, '/spinningsound.ogg')
-var config = path.join(__dirname, '/config.JSON')
+var config = path.join(__dirname, '/config-1.3.JSON')
 //app workspace
 const baseFolder = process.env.APPDATA+'\\MojoWheel';
 const dataFolder = process.env.APPDATA+'\\MojoWheel\\data';
@@ -37,9 +37,9 @@ fs.copySync(result,baseFolder+'/result.html');
 fs.copySync(spinSound,baseFolder+'/spinningsound.ogg');
 fs.copySync(bitsImage,baseFolder+'/bit.png');
 function restoreToDefault() {
-	fs.copySync(config,baseFolder+'/config.JSON'); //protect file from overwriting each time exe is ran
+	fs.copySync(config,baseFolder+'/config-1.3.JSON'); //protect file from overwriting each time exe is ran
 }
-if(!fs.existsSync(baseFolder+"/config.JSON")) { //check if config file exists
+if(!fs.existsSync(baseFolder+"/config-1.3.JSON")) { //check if config file exists
 	restoreToDefault();
 }
 //hosting index.html on localhost:8000 instead of also moving it to workspace
@@ -126,12 +126,12 @@ wss.on('connection', function connection(ws) {
 	});
 	});
 	function replaceConfigString(configOption, message) {
-		jsonfile.readFile(baseFolder+"/config.JSON", function (err,obj) {
+		jsonfile.readFile(baseFolder+"/config-1.3.JSON", function (err,obj) {
 			try {
 				for (var i=0; i< obj.length; i++) {
 					if (obj[i]['config'] == configOption) {
 						obj[i]['theOption'] = message;
-						jsonfile.writeFileSync(baseFolder+"/config.JSON", obj);
+						jsonfile.writeFileSync(baseFolder+"/config-1.3.JSON", obj);
 						break;
 					}
 				}
@@ -141,7 +141,7 @@ wss.on('connection', function connection(ws) {
 		});
 	}
 	function sendConfig() {
-		jsonfile.readFile(baseFolder+"/config.JSON", function (err,obj) {
+		jsonfile.readFile(baseFolder+"/config-1.3.JSON", function (err,obj) {
 				wss.clients.forEach(function each(client) {
 					for (var i=0; i< obj.length; i++) {
 						var configOption = obj[i]['config'];
