@@ -1,5 +1,5 @@
 ![alt text](https://stonemoney.github.io/mojowheelassets/logo.svg "MojoWheel")
-# MojoWheel
+#
 Websocket program for twitch stream overlays. Click to spin the wheel and it will randomly select one of the submitted strings via result.html, which would be captured in XSplit/OBS as a BrowserWindow.
 
 ## Getting started
