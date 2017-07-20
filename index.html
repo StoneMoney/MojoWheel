@@ -1,15 +1,40 @@
 <html>
 <head>
-<title>MojoWheel v1.2</title>
+<title>MojoWheel v1.3.1</title>
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
 <style>
-h1, p, b, button {
-	font-family:sans-serif;
+.footer {
+	text-align:right;
+	position:fixed;
+	right:0;
+	bottom:0;
 }
-input,option {
+*:disabled {
+cursor: not-allowed;
+}
+a:active {
+color:#ccc;
+}
+a:hover {
+color:#ccc;
+}
+a:visited {
+color:#aaa;
+}
+a:link {
+color:#ccc;
+}
+.opensans, h1, p, b, button {
+	font-family:'Open Sans',sans-serif;
+}
+input,option,h5,p {
 	font-family: monospace;
 }
 button {
 	width:100%;
+}
+.auto-button {
+	width:auto !important;
 }
 .record {
 	font-size:36px;
@@ -18,41 +43,88 @@ button {
 .hidden {
 	visibility:hidden;
 }
-#reconnect {
-	width:35vw;
+.logo {
+	width:400px !important;
+}
+.showCustom {
+	width: 35vmin;
+	background-color: #cb75f9;
+	border-width: 1px;
+	border-radius: 5px;
+	border-style:solid;
+	border-color:rgba(0,0,0,.6);
+}
+#status {
+	background-color:red;
+	width:150px;
+	font-family: monospace;
+	font-size:16px;
+	text-align:center;
+}
+.wrapper {
+	width: 450px; 
+	background-color: rgba(0,0,0,.2);
+	border-width: 8px;
+	border-radius: 5px;
+	border-style:solid;
+	border-color:rgba(0,0,0,.6);
+	text-align:center;
+	align:center;
+}
+.inline {
+	display:inline-block;
+}
+#spin {
+	width:250px;
+	font-weight:900;
+	background: linear-gradient(to right, #E8313C, #F7934A, #FCEE4E, #8CC63F, #15D6FF, #B654FF);
+	border-width: 1px;
+	border-radius: 2px;
+	border-style:solid;
+	border-color:rgba(0,0,0,.6);
+}
+#add {
+	color:black;
+	background: linear-gradient(to bottom right, #23db23, #179b35);
+	border-width: 1px;
+	border-radius: 2px;
+	border-style:solid;
+	border-color:rgba(0,0,0,.6);
+}
+#remove {
+	color:black;
+	background: linear-gradient(to bottom right, #ef1f33, #9b1421);
+	border-width: 1px;
+	border-radius: 2px;
+	border-style:solid;
+	border-color:rgba(0,0,0,.6);
 }
 </style>
 </head>
-<body>
+<body align="">
+<div class="wrapper">
 <h1 id="message"></h1>
-<p id="status" style="color:red">&#11044; connection to server</p><button id="reconnect" onclick="reconnectToServer()">Reconnect</button>
-<p>Location of wheel:</p>
-<p id="location">?</p>
+<object src="logo.svg" class="logo">
+	<img class="logo" src="http://stonemoney.github.io/mojowheelassets/logo.svg">
+</object>
+<div id="status" class="inline">DISCONNECTED</div><button id="reconnect" class="inline" onclick="reconnectToServer()">RECONNECT</button>
 <p id="error" style="color:red"></p>
+<select id="contents" onChange="contentsChange()" size="8" style="max-width:450px;min-width:350px;"></select><br>
+<input disabled id="textForWheel" class="inline" size="32" placeholder="Text to add"></input>
+<input disabled id="slotSelect" class="inline" size="4" placeholder="ID #"></input>
+<button disabled id="add" class="auto-button inline" onclick="addToWheel()">+</button>&nbsp;
+<button disabled id="remove" class="auto-button inline" onclick="removeFromWheel()">&nbsp;-&nbsp;</button><br><br>
+<button disabled id="spin" onclick="spinTheWheel()">SPIN THAT WHEEL!</button>
+<h4 id="lastSpun" class="opensans">previous spin result will display here</h4>
+</div>
+<p>Location of wheel: <b id="location">?</b></p>
+<button onclick="showCustomization()" class="auto-button showCustom" id="showCustom">SHOW CUSTOMIZATION OPTIONS</button>
+<div id="customizationWrapper" class="hidden">
+<button onclick="hideCustomization()" class="showCustom">HIDE CUSTOMIZATION OPTIONS</button>
+<p>Customization settings. See <a href="https://github.com/StoneMoney/MojoWheel/wiki">wiki</a> for more in-depth descriptions</p>
 <table>
 	<tr>
-		<td colspan="2">
-			<select id="contents" onChange="contentsChange()" size="8"></select>
-			</br>
-        </td>
-	</tr>
-	<tr>
-		<td><input disabled id="textForWheel" placeholder="Text to add"></input><input disabled id="slotSelect" size="4" placeholder="ID #"></input></td>
-		<td><button disabled id="add" onclick="addToWheel()">Add/Overwrite to wheel</button><button disabled id="remove" onclick="removeFromWheel()">Remove from wheel</button></td>
-	</tr>
-	<tr>
-		<td colspan="2"><button disabled id="spin" onclick="spinTheWheel()" height="400px">SPIN THAT WHEEL!</button></td>
-	</tr>
-	<tr>
-		<td colspan="2">
-			<b id="lastSpun">Previous spin result will show here</b>
-		</td>
-	</tr>
-</table>
-<p>Customization settings. See <a href="https://github.com/StoneMoney/MojoWheel/wiki">wiki</a> for more in-depth descriptions</p>
-<table border="1px">
-	<tr>
-		<td><input type="checkbox" disabled id="oldschoolanimation" placeholder="Color"></input></td>
+		<td align="right"><input type="checkbox" disabled id="oldschoolanimation" placeholder="Color"></input></td>
 		<td>Enable to revert to basic spinning animation</td>
 	</tr>
 	<tr>
@@ -68,7 +140,7 @@ button {
 		<td>Text & border color of wheel when running</td>
 	</tr>
 	<tr>
-		<td><input type="checkbox" disabled id="playsound" placeholder="Color"></input></td>
+		<td align="right"><input type="checkbox" disabled id="playsound" placeholder="Color"></input></td>
 		<td>Play sound effect on spin</td>
 	</tr>
 	<tr>
@@ -76,8 +148,8 @@ button {
 		<td>Images on both sides of wheel when spinning</td>
 	</tr>
 	<tr>
-		<td><input type="checkbox" disabled id="showprice" placeholder="Image URL"></input></td>
-		<td>Enable function to alert (advertise) the price of spinning the wheel from within the program</td>
+		<td align="right"><input type="checkbox" disabled id="showprice" placeholder="Image URL"></input></td>
+		<td>Enable function to alert (advertise) the price of spinning <br>the wheel from within the program</td>
 	</tr>
 	<tr>
 		<td><input disabled id="theprice" placeholder="Price"></input></td>
@@ -99,6 +171,10 @@ button {
 		<td><button disabled id="defaultConfig" onclick="defaultConfig()" height="400px">Restore to default</button></td>
 	</tr>
 </table>
+</div><br>
+<div class="footer">
+	<h5><a href="https://github.com/StoneMoney/MojoWheel/wiki">help and new releases</a><br>[@ngiano | MojoWheel 1.3.1 | 19-7-2017]</h5>
+</div>
 <script>
 	var wheelPreview = document.getElementById("contents");
 	var pattern1 = "^sendtowheel ([0-9]+) (.*)";
@@ -114,32 +190,41 @@ button {
 	function reconnectToServer() {
 		location.reload();
 	}
+	function showCustomization() {
+		document.getElementById("customizationWrapper").classList.remove("hidden");
+		document.getElementById("showCustom").classList.add("hidden");
+	}
+	function hideCustomization() {
+		document.getElementById("customizationWrapper").classList.add("hidden");
+		document.getElementById("showCustom").classList.remove("hidden");
+	}
 	function sortSelected(selElem) {
-    var tmpAry = new Array();
-    for (var i=0;i<selElem.options.length;i++) {
-        tmpAry[i] = new Array();
-        tmpAry[i][0] = parseInt(selElem.options[i].value);
-        tmpAry[i][1] = selElem.options[i].text;
-    }
-    tmpAry.sort(function (a, b) {
-	  return a[0] - b[0];
-	});
-    while (selElem.options.length > 0) {
-        selElem.options[0] = null;
-    }
-    for (var i=0;i<tmpAry.length;i++) {
-        var op = new Option(tmpAry[i][1], tmpAry[i][0]);
-		op.id = ("wheel"+tmpAry[i][0]);
-        selElem.options[i] = op;
-    }
-    return;
+		var tmpAry = new Array();
+		for (var i=0;i<selElem.options.length;i++) {
+			tmpAry[i] = new Array();
+			tmpAry[i][0] = parseInt(selElem.options[i].value);
+			tmpAry[i][1] = selElem.options[i].text;
+		} 
+		tmpAry.sort(function (a, b) {
+		  return a[0] - b[0];
+		});
+		while (selElem.options.length > 0) {
+			selElem.options[0] = null;
+		}
+		for (var i=0;i<tmpAry.length;i++) {
+			var op = new Option(tmpAry[i][1], tmpAry[i][0]);
+			op.id = ("wheel"+tmpAry[i][0]);
+			selElem.options[i] = op;
+		}
+		return;
 	}
 	function contentsChange() {
 		document.getElementById("slotSelect").value = wheelPreview.value;
 	}
 	websocket.onopen = function() {
 		websocket.send("config-request");
-		document.getElementById("status").style.color = "green";
+		document.getElementById("status").style.backgroundColor = "#179b35";
+		document.getElementById("status").innerHTML = "CONNECTED";
 		websocket.send("requesting");
 		document.getElementById("add").disabled = false;
 		document.getElementById("remove").disabled = false;
@@ -185,7 +270,7 @@ button {
 		if (re3.test(ev.data)) {
 			var message = ev.data;
 			var matches = message.match(pattern3);
-			document.getElementById("location").innerHTML = "XSPLIT: "+matches[1] +"\\result.html "+"\n"+" OBS: file:///"+matches[1]+"\\result.html";
+			document.getElementById("location").innerHTML = matches[1] +"\\result.html";
 		}
 		if (re4.test(ev.data)) {
 			var message = ev.data;
@@ -205,7 +290,7 @@ button {
 		document.getElementById("spin").disabled = true;
 		document.getElementById("textForWheel").disabled = true;
 		document.getElementById("slotSelect").disabled = true;
-		document.getElementById("status").style.color = "red";
+		document.getElementById("status").style.backgroundColor = "red";
 		document.getElementById("reconnect").classList.remove("hidden");
 		document.getElementById("backgroundcolor").disabled = true;
 		document.getElementById("textcolor").disabled = true;
@@ -255,7 +340,7 @@ button {
 			option.remove(option.selectedIndex);
 			websocket.send("removefromwheel "+slotNo); //send method
 		} else {
-			document.getElementById("error").innerHTML = "Error: No number inserted to remove, or number inserted is not saved";
+			document.getElementById("error").innerHTML = "Error: No number (integer >0) inserted to remove, or number inserted is not saved";
 			setTimeout(function() {
 				document.getElementById("error").innerHTML = "";
 			},5000);
@@ -280,53 +365,55 @@ button {
 	function saveConfig() {
 		setTimeout(function() {
 			if(document.getElementById("backgroundcolor").value != "") {
-				websocket.send("config backgroundcolor "+document.getElementById("backgroundcolor").value);
+				websocket.send("sendconfig backgroundcolor "+document.getElementById("backgroundcolor").value);
 			}
 		},100);
 		setTimeout(function() {
 			if(document.getElementById("textcolor").value != "") {
-				websocket.send("config textcolor "+document.getElementById("textcolor").value);
+				websocket.send("sendconfig textcolor "+document.getElementById("textcolor").value);
 			}
 		},150);
 		setTimeout(function() {
 			if(document.getElementById("playsound").checked) {
-				websocket.send("config playsound true");
+				websocket.send("sendconfig playsound true");
 			} else {
-				websocket.send("config playsound false");
+				websocket.send("sendconfig playsound false");
 			}
 		},200);
 		setTimeout(function() {
 			if(document.getElementById("sideimage").value != "") {
-				websocket.send("config sideimage "+document.getElementById("sideimage").value);
+				websocket.send("sendconfig sideimage "+document.getElementById("sideimage").value);
 			}
 		},250);
 		setTimeout(function() {
 			if(document.getElementById("showprice").checked) {
-				websocket.send("config showprice true");
+				websocket.send("sendconfig showprice true");
 			} else {
-				websocket.send("config showprice false");
+				websocket.send("sendconfig showprice false");
 			}
 		},300);
 		setTimeout(function() {
 			if(document.getElementById("theprice").value != "") {
-				websocket.send("config theprice "+document.getElementById("theprice").value);
+				websocket.send("sendconfig theprice "+document.getElementById("theprice").value);
 			}
 		},350);
 		setTimeout(function() {
 			if(document.getElementById("cooldownprice").value != "" && !isNaN(document.getElementById("cooldownprice").value) ) {
-				websocket.send("config cooldownprice "+document.getElementById("cooldownprice").value);
+				websocket.send("sendconfig cooldownprice "+document.getElementById("cooldownprice").value);
 			}
 		},400);
 		setTimeout(function() {
 			if(document.getElementById("onscreenprice").value != "" && !isNaN(document.getElementById("onscreenprice").value) ) {
-				websocket.send("config onscreenprice "+document.getElementById("onscreenprice").value);
+				websocket.send("sendconfig onscreenprice "+document.getElementById("onscreenprice").value);
 			}
 		},450);
-				setTimeout(function() {
+		setTimeout(function() {
+			websocket.send("refresh-wheel");
+			console.log("Send");
 			if(document.getElementById("oldschoolanimation").checked) {
-				websocket.send("config oldschoolanimation true");
+				websocket.send("sendconfig oldschoolanimation true");
 			} else {
-				websocket.send("config oldschoolanimation false");
+				websocket.send("sendconfig oldschoolanimation false");
 			}
 		},500);
 		document.getElementById("saveConfig").disabled = true;

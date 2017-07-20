@@ -5,10 +5,12 @@ Websocket program for twitch stream overlays. Click to spin the wheel and it wil
 ## Getting started
 
 Dependencies:
-* Node.js & npm
+* Node.js & npm (6 recc)
 * [npm ws](https://www.npmjs.com/package/ws)
 * [npm glob](https://www.npmjs.com/package/glob)
-
+* [npm opn](https://www.npmjs.com/package/opn)
+* [npm jsonfile](https://www.npmjs.com/package/jsonfile)
+* [npm fs-extra](https://www.npmjs.com/package/fs-extra)
 Just use ``npm install`` to get everything needed.
 
 Index.html is the controller where you can add, remove, spin, and view the prompts.
@@ -23,5 +25,4 @@ To compile the server into an exe: ``pkg --output MojoWheel.exe --targets node6-
 
 ## Todo & Future features
 * macOS & Linux support
-* Select item via preview list instead of typing id
 * Import lists

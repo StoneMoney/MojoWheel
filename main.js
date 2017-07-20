@@ -15,6 +15,7 @@ var result = path.join(__dirname, '/result.html')
 var bitsImage = path.join(__dirname, '/bit.png')
 var spinSound = path.join(__dirname, '/spinningsound.ogg')
 var config = path.join(__dirname, '/config-1.3.JSON')
+var logo = path.join(__dirname, '/logo.svg')
 //app workspace
 const baseFolder = process.env.APPDATA+'\\MojoWheel';
 const dataFolder = process.env.APPDATA+'\\MojoWheel\\data';
@@ -30,7 +31,7 @@ var pattern1 = "^addtogoalwheel ([0-9]+) (.*)";
 var re1 = new RegExp(pattern1,'i');
 var pattern2 = "^removefromwheel ([0-9]+)";
 var re2 = new RegExp(pattern2,'i');
-var pattern3 = "^config ([a-z]+) (.*)";
+var pattern3 = "^sendconfig ([a-z]+) (.*)";
 var re3 = new RegExp(pattern3,'i');
 //send local copies of files to workspace
 fs.copySync(result,baseFolder+'/result.html');
@@ -108,6 +109,16 @@ wss.on('connection', function connection(ws) {
 			client.send("location "+baseFolder);
 		});
 	}
+	if(message == "refresh-wheel") {
+		wss.clients.forEach(function each(client) {
+			client.send("refresh-wheel");
+		});
+	}
+	if(message == "spin") {
+		wss.clients.forEach(function each(client) {
+			client.send("spin");
+		});
+	}
 	if(message == "restoretodefault") {
 		restoreToDefault();
 		sendConfig();
@@ -119,11 +130,11 @@ wss.on('connection', function connection(ws) {
 		var matches = message.match(pattern3);  
 		replaceConfigString(matches[1],matches[2]);
 	}
-	wss.clients.forEach(function each(client) {
-		if (client !== ws && client.readyState === WebSocket.OPEN) {
-				client.send(message);
-		}
-	});
+	//wss.clients.forEach(function each(client) {
+	//	if (client !== ws && client.readyState === WebSocket.OPEN) {
+	//			client.send(message);
+	//	}
+	//});
 	});
 	function replaceConfigString(configOption, message) {
 		jsonfile.readFile(baseFolder+"/config-1.3.JSON", function (err,obj) {

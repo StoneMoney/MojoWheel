@@ -68,10 +68,10 @@ var isSpinning = false;
 var playsound = true;
 var showprice = false;
 var theprice = "100 bits";
-var onscreenprice = "10";
-var cooldownprice = "1";
+var onscreenprice = "60000";
+var cooldownprice = "10000";
 var sideimage = "bit.png";
-var wheelArray = {};
+var wheelArray = [];
 var oldSchoolAnimation = false;
 Array.prototype.removeValue = function(name, value){
    var array = $.map(this, function(v,i){
@@ -85,20 +85,6 @@ var re1 = new RegExp(pattern1,"i");
 var pattern2 = "^config ([A-Z]+|[a-z]+) (.*)";
 var re2 = new RegExp(pattern2,"i");
 //create a new WebSocket object.
-function updateInterval() {
-	clearInterval()
-	setInterval(function() {
-		if(showprice && !isSpinning) {
-			$('#table').fadeIn('slow');
-			document.getElementById("selectionSpot").innerHTML = "for "+theprice+"!";
-			document.getElementById("infotext").innerHTML = "SPIN THE WHEEL...";
-			setTimeout(function() {
-				$('#table').fadeOut('slow');
-				document.getElementById("infotext").innerHTML = "SPINNING WHEEL...";
-			},(parseInt(onscreenprice)*1000));
-		}
-	},(parseInt(onscreenprice)*60000));
-}
 websocket = new WebSocket("ws://localhost:8080/");
 websocket.onopen = function() {
 	$('#table').fadeOut('slow');
@@ -125,7 +111,6 @@ websocket.onmessage = function(ev) {
 	if (re2.test(ev.data)) {
 		var message = ev.data;
 		var matches = message.match(pattern2);
-		console.log(matches);
 		if(matches[1]=="backgroundcolor") {
 			try {
 				document.getElementById("table").style.backgroundColor = matches[2];
@@ -159,11 +144,11 @@ websocket.onmessage = function(ev) {
 			}
 		} else if (matches[1]=="theprice") {
 			theprice = matches[2]
-		} else if (matches[1]=="cooldownprice") {
-			cooldownprice = matches[2]
-			updateInterval();
 		} else if (matches[1]=="onscreenprice") {
-			onscreenprice = matches[2]
+			onscreenprice = (matches[2] * 1000);
+		} else if (matches[1]=="cooldownprice") {
+			cooldownprice = (matches[2] * 60000)
+			updateInterval();
 		} else if (matches[1]=="oldschoolanimation") {
 			if(matches[2] == "true") {
 				oldSchoolAnimation = true
@@ -172,6 +157,9 @@ websocket.onmessage = function(ev) {
 			}
 		}
 	};
+	if (ev.data.startsWith("refresh-wheel")) { 
+		location.reload();
+	}
 	if (ev.data.startsWith("spin")) {
 		var finalSelection;
 		//begin insane animation spree
@@ -541,6 +529,24 @@ websocket.onmessage = function(ev) {
 				websocket.send("wheelselected "+finalSelection);
 			},7200);
 		}
+	}
+}
+var advertiseInterval = setInterval(function(){console.log("blep");advertise()},cooldownprice);
+function updateInterval() {
+	clearInterval(advertiseInterval)
+	advertiseInterval = setInterval(function(){advertise()},cooldownprice);
+}
+function advertise() {
+	if(showprice && !isSpinning) {
+				console.log("doing the thing");
+				$('#table').fadeIn('slow');
+				document.getElementById("selectionSpot").innerHTML = "for "+theprice+"!";
+				document.getElementById("infotext").innerHTML = "SPIN THE WHEEL...";
+				setTimeout(function() {
+					console.log("stopping the thing");
+					$('#table').fadeOut('slow');
+					document.getElementById("infotext").innerHTML = "SPINNING WHEEL...";
+				},onscreenprice);
 	}
 }
 </script>
