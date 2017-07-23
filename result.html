@@ -168,7 +168,7 @@ websocket.onmessage = function(ev) {
 		$('#table').fadeIn('fast');
 		setTimeout(function() {
 			finalSelection = wheelArray[Math.floor(Math.random() * wheelArray.length)];
-		},10);
+		},300);
 		if(oldSchoolAnimation) {
 			setTimeout(function() {
 				document.getElementById('selectionSpot').innerHTML = wheelArray[Math.floor(Math.random() * wheelArray.length)];
@@ -513,11 +513,11 @@ websocket.onmessage = function(ev) {
 					//document.getElementById("animate").classList.add("slide-up");
 				}
 			}
-			isSpinning = true;
-			if(playsound) {
-				click.play();
-			}
-			},25);
+				isSpinning = true;
+				if(playsound) {
+					click.play();
+				}
+			},310);
 			setTimeout(function() {
 				document.getElementById("selectionSpot").innerHTML = finalSelection;
 			},5100);
@@ -540,11 +540,13 @@ function advertise() {
 	if(showprice && !isSpinning) {
 				console.log("doing the thing");
 				$('#table').fadeIn('slow');
+				document.getElementById("selectionSpot").classList.remove("hidden");
 				document.getElementById("selectionSpot").innerHTML = "for "+theprice+"!";
 				document.getElementById("infotext").innerHTML = "SPIN THE WHEEL...";
 				setTimeout(function() {
 					console.log("stopping the thing");
 					$('#table').fadeOut('slow');
+					document.getElementById("selectionSpot").classList.add("hidden");
 					document.getElementById("infotext").innerHTML = "SPINNING WHEEL...";
 				},onscreenprice);
 	}

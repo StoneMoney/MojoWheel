@@ -114,6 +114,11 @@ wss.on('connection', function connection(ws) {
 			client.send("refresh-wheel");
 		});
 	}
+	if(message.startsWith("wheelselected")) {
+		wss.clients.forEach(function each(client) {
+			client.send(message);
+		});
+	}
 	if(message == "spin") {
 		wss.clients.forEach(function each(client) {
 			client.send("spin");
