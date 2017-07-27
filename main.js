@@ -16,6 +16,7 @@ var bitsImage = path.join(__dirname, '/bit.png')
 var spinSound = path.join(__dirname, '/spinningsound.ogg')
 var config = path.join(__dirname, '/config-1.3.JSON')
 var logo = path.join(__dirname, '/logo.svg')
+var wheelBase = path.join(__dirname, '/wheel-string-storage.array')
 //app workspace
 const baseFolder = process.env.APPDATA+'\\MojoWheel';
 const dataFolder = process.env.APPDATA+'\\MojoWheel\\data';
@@ -27,9 +28,9 @@ if (!fs.existsSync(dataFolder)){
     fs.mkdirSync(dataFolder);
 }
 //regex
-var pattern1 = "^addtogoalwheel ([0-9]+) (.*)";
+var pattern1 = "^addtogoalwheel (.*)";
 var re1 = new RegExp(pattern1,'i');
-var pattern2 = "^removefromwheel ([0-9]+)";
+var pattern2 = "^removefromwheel (.*)";
 var re2 = new RegExp(pattern2,'i');
 var pattern3 = "^sendconfig ([a-z]+) (.*)";
 var re3 = new RegExp(pattern3,'i');
@@ -42,6 +43,10 @@ function restoreToDefault() {
 }
 if(!fs.existsSync(baseFolder+"/config-1.3.JSON")) { //check if config file exists
 	restoreToDefault();
+}
+if(fs.existsSync(dataFolder+"/wheel-string-storage.array")) {
+	fs.copySync(wheelBase,dataFolder+'/wheel-string-storage.array');
+	console.log("No wheel array file located! Creating a new one. If you were using a previous version of MojoWheel and would like to transfer your options, get the conversion tool on github. A link can be found in the corner of the dashboard")
 }
 //hosting index.html on localhost:8000 instead of also moving it to workspace
 fs.readFile(index, function (err, html) {
@@ -59,31 +64,54 @@ opn('http://localhost:8000');
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
 	if (re1.test(message)) {
-		var matches = message.match(pattern1);
-		fs.writeFile(dataFolder+'/wheel-'+matches[1]+'.txt', matches[2], function (err) {
-			if (err)  console.log('Error: ', err);
+		fs.readFile(dataFolder+"/wheel-string-storage.array", function (err, arrayFile) {
+			var matches = message.match(pattern1);
+			arrayFile = JSON.parse(arrayFile);
+			if(!err) {
+				arrayFile.push(matches[1]);
+				fs.writeFile(dataFolder+"/wheel-string-storage.array", JSON.stringify(arrayFile), function (err) {
+					if (err)  console.log('Error: ', err);
+				});
+			}
 		});
 	};
 	if (re2.test(message)) {
 		var matches = message.match(pattern2);
-		fs.unlink(dataFolder+'/wheel-'+matches[1]+'.txt', function (err) {
-			if (err)  console.log('Error: ', err);
+		var textToRemove = matches[1]
+		console.log(textToRemove);
+		fs.readFile(dataFolder+"/wheel-string-storage.array", function (err, arrayFile) {
+			if(!err) {
+				arrayFile = JSON.parse(arrayFile);
+				var spliceIndex = arrayFile.indexOf(textToRemove);
+				if(spliceIndex != -1) {
+					arrayFile.splice(spliceIndex, 1);
+					fs.writeFile(dataFolder+"/wheel-string-storage.array", JSON.stringify(arrayFile), function (err) {
+						if (err)  console.log('Error: ', err);
+					});
+				}
+			}
 		});
 	};
 	if(message == "requesting") {
-		glob(dataFolder+"/wheel-*.txt", function (er, files) {
-			files.forEach(function(matchingFile) {
-					fs.readFile(matchingFile, 'utf8', function(err, data){
-						if(!err) {
-							matchingFile = matchingFile.replace(/\//g,'\\'); //make sure consistant with entire program
-							var step1 = matchingFile.replace(dataFolder+"\\wheel-","");
-							var itemNo = step1.replace(".txt","");
-							wss.clients.forEach(function each(client) {
-								client.send("sendtowheel "+itemNo+" "+data);
-							});
-						}
-					});
-			});
+		fs.readFile(dataFolder+"/wheel-string-storage.array", function (err, arrayFile) {
+			if(!err) {
+				wss.clients.forEach(function each(client) {
+					client.send("sendtowheel "+arrayFile);
+				});
+				wss.clients.forEach(function each(client) {
+					client.send("location "+baseFolder);
+				});
+			}
+		});
+	}
+	if(message == "dash-requesting") {
+		sendConfig();
+		fs.readFile(dataFolder+"/wheel-string-storage.array", function (err, arrayFile) {
+			if(!err) {
+				wss.clients.forEach(function each(client) {
+					client.send("sendtodash "+arrayFile);
+				});
+			}
 		});
 		wss.clients.forEach(function each(client) {
 			client.send("location "+baseFolder);
@@ -91,19 +119,15 @@ wss.on('connection', function connection(ws) {
 	}
 	if(message == "wheel-requesting") {
 		sendConfig();
-		glob(dataFolder+"/wheel-*.txt", function (er, files) {
-			files.forEach(function(matchingFile) {
-					fs.readFile(matchingFile, 'utf8', function(err, data){
-						if(!err) {
-							matchingFile = matchingFile.replace(/\//g,'\\'); //make sure consistant with entire program
-							var step1 = matchingFile.replace(dataFolder+"\\wheel-","");
-							var itemNo = step1.replace(".txt","");
-							wss.clients.forEach(function each(client) {
-								client.send("sendtowheel "+itemNo+" "+data);
-							});
-						}
-					});
-			});
+		fs.readFile(dataFolder+"/wheel-string-storage.array", function (err, arrayFile) {
+			if(!err) {
+				wss.clients.forEach(function each(client) {
+					client.send("sendtowheel "+arrayFile);
+				});
+				wss.clients.forEach(function each(client) {
+					client.send("location "+baseFolder);
+				});
+			}
 		});
 		wss.clients.forEach(function each(client) {
 			client.send("location "+baseFolder);
@@ -134,6 +158,9 @@ wss.on('connection', function connection(ws) {
 	if(re3.test(message)) {
 		var matches = message.match(pattern3);  
 		replaceConfigString(matches[1],matches[2]);
+	}
+	if(message == "openDataFolder") {
+		opn(dataFolder);
 	}
 	//wss.clients.forEach(function each(client) {
 	//	if (client !== ws && client.readyState === WebSocket.OPEN) {

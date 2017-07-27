@@ -11,6 +11,7 @@ Dependencies:
 * [npm opn](https://www.npmjs.com/package/opn)
 * [npm jsonfile](https://www.npmjs.com/package/jsonfile)
 * [npm fs-extra](https://www.npmjs.com/package/fs-extra)
+* [npm prompt](https://www.npmjs.com/package/prompt) *for convert program*
 Just use ``npm install`` to get everything needed.
 
 Index.html is the controller where you can add, remove, spin, and view the prompts.
@@ -23,6 +24,7 @@ To start the server run ``node main.js`` or ``npm start``
 
 To compile the server into an exe: ``pkg --output MojoWheel.exe --targets node6-win-x86 main.js``
 
+To compile the converter into an exe: ``pkg --output Convert.exe --targets node6-win-x86 convert.js``
+
 ## Todo & Future features
 * macOS & Linux support
-* Import lists

@@ -80,7 +80,7 @@ Array.prototype.removeValue = function(name, value){
    this.length = 0; //clear original array
    this.push.apply(this, array); //push all elements except the one we want to delete
 }
-var pattern1 = "^sendtowheel ([0-9]+) (.*)";
+var pattern1 = "^sendtowheel (.*)";
 var re1 = new RegExp(pattern1,"i");
 var pattern2 = "^config ([A-Z]+|[a-z]+) (.*)";
 var re2 = new RegExp(pattern2,"i");
@@ -101,12 +101,13 @@ websocket.onclose = function() {
 		location.reload();
 	},25000)
 };
-function getRandomItem() { return wheelArray[Math.floor(Math.random() * wheelArray.length)] }
+function getRandomItem() { return wheelArray[Math.floor(Math.random() * wheelArray.length)]; }
 websocket.onmessage = function(ev) {
 	if (re1.test(ev.data)) {
 		var message = ev.data;
 		var matches = message.match(pattern1);
-		wheelArray.push(matches[2]);
+		wheelArray = JSON.parse(matches[1]);
+		console.log(wheelArray[2]);
 	};
 	if (re2.test(ev.data)) {
 		var message = ev.data;
@@ -497,7 +498,7 @@ websocket.onmessage = function(ev) {
 				document.getElementById("selectionSpot").classList.add("hidden");
 			},7200);
 		} else {
-			setTimeout(function() { 
+			setTimeout(function() {
 			var loopCount = 1;
 			var displayHTML = "";
 			for(loopCount;loopCount<= 18;loopCount++) {
@@ -531,20 +532,18 @@ websocket.onmessage = function(ev) {
 		}
 	}
 }
-var advertiseInterval = setInterval(function(){console.log("blep");advertise()},cooldownprice);
+var advertiseInterval = setInterval(function(){advertise()},cooldownprice);
 function updateInterval() {
 	clearInterval(advertiseInterval)
 	advertiseInterval = setInterval(function(){advertise()},cooldownprice);
 }
 function advertise() {
 	if(showprice && !isSpinning) {
-				console.log("doing the thing");
 				$('#table').fadeIn('slow');
 				document.getElementById("selectionSpot").classList.remove("hidden");
 				document.getElementById("selectionSpot").innerHTML = "for "+theprice+"!";
 				document.getElementById("infotext").innerHTML = "SPIN THE WHEEL...";
 				setTimeout(function() {
-					console.log("stopping the thing");
 					$('#table').fadeOut('slow');
 					document.getElementById("selectionSpot").classList.add("hidden");
 					document.getElementById("infotext").innerHTML = "SPINNING WHEEL...";

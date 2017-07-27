@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>MojoWheel v1.3.12</title>
+<title>MojoWheel v1.4</title>
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
 <style>
 .footer {
@@ -109,15 +109,16 @@ button {
 </object>
 <div id="status" class="inline">DISCONNECTED</div><button id="reconnect" class="inline" onclick="reconnectToServer()">RECONNECT</button>
 <p id="error" style="color:red"></p>
-<select id="contents" onChange="contentsChange()" size="8" style="max-width:450px;min-width:350px;"></select><br>
-<input disabled id="textForWheel" class="inline" size="32" placeholder="Text to add"></input>
-<input disabled id="slotSelect" class="inline" size="4" placeholder="ID #"></input>
-<button disabled id="add" class="auto-button inline" onclick="addToWheel()">+</button>&nbsp;
-<button disabled id="remove" class="auto-button inline" onclick="removeFromWheel()">&nbsp;-&nbsp;</button><br><br>
+<select id="contents" size="8" style="max-width:450px;min-width:350px;"></select><br><br>
+<input disabled id="textForWheel" class="inline" size="28" placeholder="String"></input>
+<button disabled id="add" class="auto-button inline" onclick="addToWheel()">add</button>&nbsp;
+<button disabled id="remove" class="auto-button inline" onclick="removeFromWheel()">remove selected</button><br><br>
 <button disabled id="spin" onclick="spinTheWheel()">SPIN THAT WHEEL!</button>
 <h4 id="lastSpun" class="opensans">previous spin result will display here</h4>
 </div>
-<p>Location of wheel: <b id="location">?</b></p>
+<p>Location of wheel: <b id="location">?</b><br>
+<button disabled id="export" class="auto-button inline" onclick="exportStrings()">import and export strings</button>
+</p>
 <button onclick="showCustomization()" class="auto-button showCustom" id="showCustom">SHOW CUSTOMIZATION OPTIONS</button>
 <div id="customizationWrapper" class="hidden">
 <button onclick="hideCustomization()" class="showCustom">HIDE CUSTOMIZATION OPTIONS</button>
@@ -173,11 +174,11 @@ button {
 </table>
 </div><br>
 <div class="footer">
-	<h5><a href="https://github.com/StoneMoney/MojoWheel/wiki">help and new releases</a><br>[@ngiano | MojoWheel 1.3.2 | 22-7-2017]</h5>
+	<h5><a href="https://github.com/StoneMoney/MojoWheel/wiki">help and new releases</a><br>[@ngiano | MojoWheel 1.4 | 26-7-2017]</h5>
 </div>
 <script>
 	var wheelPreview = document.getElementById("contents");
-	var pattern1 = "^sendtowheel ([0-9]+) (.*)";
+	var pattern1 = "^sendtodash (.*)";
 	var re1 = new RegExp(pattern1,'i');
 	var pattern2 = "^wheelselected (.*)";
 	var re2 = new RegExp(pattern2,'i');
@@ -198,39 +199,15 @@ button {
 		document.getElementById("customizationWrapper").classList.add("hidden");
 		document.getElementById("showCustom").classList.remove("hidden");
 	}
-	function sortSelected(selElem) {
-		var tmpAry = new Array();
-		for (var i=0;i<selElem.options.length;i++) {
-			tmpAry[i] = new Array();
-			tmpAry[i][0] = parseInt(selElem.options[i].value);
-			tmpAry[i][1] = selElem.options[i].text;
-		} 
-		tmpAry.sort(function (a, b) {
-		  return a[0] - b[0];
-		});
-		while (selElem.options.length > 0) {
-			selElem.options[0] = null;
-		}
-		for (var i=0;i<tmpAry.length;i++) {
-			var op = new Option(tmpAry[i][1], tmpAry[i][0]);
-			op.id = ("wheel"+tmpAry[i][0]);
-			selElem.options[i] = op;
-		}
-		return;
-	}
-	function contentsChange() {
-		document.getElementById("slotSelect").value = wheelPreview.value;
-	}
 	websocket.onopen = function() {
 		websocket.send("config-request");
 		document.getElementById("status").style.backgroundColor = "#179b35";
 		document.getElementById("status").innerHTML = "CONNECTED";
-		websocket.send("requesting");
+		websocket.send("dash-requesting");
 		document.getElementById("add").disabled = false;
 		document.getElementById("remove").disabled = false;
 		document.getElementById("spin").disabled = false;
 		document.getElementById("textForWheel").disabled = false;
-		document.getElementById("slotSelect").disabled = false;
 		document.getElementById("reconnect").classList.add("hidden");
 		document.getElementById("backgroundcolor").disabled = false;
 		document.getElementById("textcolor").disabled = false;
@@ -244,22 +221,19 @@ button {
 		document.getElementById("saveConfig").disabled = false;
 		document.getElementById("defaultConfig").disabled = false;
 		document.getElementById("oldschoolanimation").disabled = false;
+		document.getElementById("export").disabled = false;
 	};
 	websocket.onmessage = function(ev) {
 		if (re1.test(ev.data)) {
 			var message = ev.data;
 			var matches = message.match(pattern1);
-			var element = document.getElementById('wheel'+matches[1]);
-			if (!element) {
+			console.log(matches[1])
+			var arrayText = JSON.parse(matches[1]);
+			for(var i = 0;i <= arrayText.length-1; i++) {
 				var wheelItem = document.createElement("option");
-				wheelItem.id = "wheel"+matches[1];
-				wheelItem.innerHTML = "" + matches[1] + " | " + matches[2];
-				wheelItem.value = matches[1];
+				wheelItem.id = "wheel"+arrayText[i];
+				wheelItem.innerHTML = arrayText[i]
 				wheelPreview.add(wheelItem);
-				sortSelected(wheelPreview);
-			} else {
-				element.innerHTML = "" + matches[1] + " | " + matches[2];
-				sortSelected(wheelPreview);
 			}
 		};
 		if (re2.test(ev.data)) {
@@ -289,7 +263,6 @@ button {
 		document.getElementById("remove").disabled = true;
 		document.getElementById("spin").disabled = true;
 		document.getElementById("textForWheel").disabled = true;
-		document.getElementById("slotSelect").disabled = true;
 		document.getElementById("status").style.backgroundColor = "red";
 		document.getElementById("status").innerHTML = "DISCONNECTED";
 		document.getElementById("reconnect").classList.remove("hidden");
@@ -305,43 +278,31 @@ button {
 		document.getElementById("defaultConfig").disabled = true;
 		document.getElementById("showprice").disabled = true;
 		document.getElementById("oldschoolanimation").disabled = true;
+		document.getElementById("export").disabled = true;
 	};
 	function addToWheel() {
-		if(!isNaN(document.getElementById("slotSelect").value) && document.getElementById("slotSelect").value > 0 && document.getElementById("textForWheel").value != "") {
+		if(document.getElementById("textForWheel").value != "") {
 			var content = document.getElementById("textForWheel").value;
-			var slotNo = Math.floor(document.getElementById("slotSelect").value);
-			var element = document.getElementById('wheel'+slotNo);
-			if(!element) {
-				var wheelItem = document.createElement("option");
-				wheelItem.id = "wheel"+slotNo;
-				wheelItem.innerHTML = "" + slotNo + " | " + content;
-				wheelItem.value = slotNo;
-				wheelPreview.add(wheelItem);
-				sortSelected(wheelPreview);
-				websocket.send("addtogoalwheel "+slotNo+" "+content); //send method
-				document.getElementById('textForWheel').value = "";
-				document.getElementById('slotSelect').value = parseInt(document.getElementById('slotSelect').value) + 1;
-			} else {
-				element.innerHTML = "" + slotNo + " | " + content;
-				websocket.send("addtogoalwheel "+slotNo+" "+content); //send method
-				document.getElementById('textForWheel').value = "";
-				document.getElementById('slotSelect').value = parseInt(document.getElementById('slotSelect').value) + 1;
-			}
+			var wheelItem = document.createElement("option");
+			wheelItem.innerHTML = content;
+			wheelPreview.add(wheelItem);
+			websocket.send("addtogoalwheel "+content); //send method
+			document.getElementById('textForWheel').value = "";
 		} else {
-			document.getElementById("error").innerHTML = "Error: Missing 'text to add'/'id number', or the id inserted is not an integer >0";
+			document.getElementById("error").innerHTML = "Error: Missing text to add";
 			setTimeout(function() {
 				document.getElementById("error").innerHTML = "";
 			},5000);
 		}
 	}
 	function removeFromWheel() {
-		if(!isNaN(document.getElementById("slotSelect").value) && document.getElementById("wheel"+document.getElementById("slotSelect").value) ) {
-			var slotNo = document.getElementById("slotSelect").value;
-			var option = document.getElementById("wheel"+slotNo);
-			option.remove(option.selectedIndex);
-			websocket.send("removefromwheel "+slotNo); //send method
+		if(wheelPreview.value != null) {
+			websocket.send("removefromwheel "+wheelPreview.value); //send method
+			var index = wheelPreview.options[wheelPreview.selectedIndex].index
+			console.log(index);
+			document.getElementById("contents").remove(index);
 		} else {
-			document.getElementById("error").innerHTML = "Error: No number (integer >0) inserted to remove, or number inserted is not saved";
+			document.getElementById("error").innerHTML = "Error: You have no item selected";
 			setTimeout(function() {
 				document.getElementById("error").innerHTML = "";
 			},5000);
@@ -353,6 +314,9 @@ button {
 		setTimeout(function() {
 			document.getElementById("spin").disabled = false;
 		},8000);
+	}
+	function exportStrings() {
+		websocket.send("openDataFolder");
 	}
 	function defaultConfig() {
 		if(confirm("Restore all customization settings to default?") == true) {
