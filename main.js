@@ -44,7 +44,7 @@ function restoreToDefault() {
 if(!fs.existsSync(baseFolder+"/config-1.3.JSON")) { //check if config file exists
 	restoreToDefault();
 }
-if(fs.existsSync(dataFolder+"/wheel-string-storage.array")) {
+if(!fs.existsSync(dataFolder+"/wheel-string-storage.array")) {
 	fs.copySync(wheelBase,dataFolder+'/wheel-string-storage.array');
 	console.log("No wheel array file located! Creating a new one. If you were using a previous version of MojoWheel and would like to transfer your options, get the conversion tool on github. A link can be found in the corner of the dashboard")
 }
