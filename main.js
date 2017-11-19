@@ -39,11 +39,27 @@ fs.copySync(result,baseFolder+'/result.html');
 fs.copySync(spinSound,baseFolder+'/spinningsound.ogg');
 fs.copySync(bitsImage,baseFolder+'/bit.png');
 function restoreToDefault() {
-	fs.copySync(config,baseFolder+'/config-1.3.JSON'); //protect file from overwriting each time exe is ran
+	fs.copySync(config,baseFolder+'/config-1.4.JSON'); //protect file from overwriting each time exe is ran
 }
-if(!fs.existsSync(baseFolder+"/config-1.3.JSON")) { //check if config file exists
-	restoreToDefault();
+function updateConfigFile() {
+	jsonfile.readFile(baseFolder+"/config-1.3.JSON", function (err,obj) {
+		try {
+				obj[9] = JSON.parse('{"config":"repeatmode","theOption":"true"}');
+				obj[10] = JSON.parse('{"config":"volume","theOption":"100"}');
+				jsonfile.writeFileSync(baseFolder+"/config-1.4.JSON", obj);
+				//fs.unlink(baseFolder+"/config-1.3.JSON"); Don't Delete ATM for backwards compatability
+				console.log("Config file updated for new release");
+		} catch(err) {
+			
+		}
+	})
 }
+if(!fs.existsSync(baseFolder+"/config-1.4.JSON") && fs.existsSync(baseFolder+"/config-1.3.JSON")) { //check if config file exists, and if legacy config file exists
+	updateConfigFile()
+} else if(!fs.existsSync(baseFolder+"/config-1.4.JSON")) {
+	restoreToDefault()
+}
+
 if(!fs.existsSync(dataFolder+"/wheel-string-storage.array")) {
 	fs.copySync(wheelBase,dataFolder+'/wheel-string-storage.array');
 	console.log("No wheel array file located! Creating a new one. If you were using a previous version of MojoWheel and would like to transfer your options, get the conversion tool on github. A link can be found in the corner of the dashboard")
@@ -169,12 +185,12 @@ wss.on('connection', function connection(ws) {
 	//});
 	});
 	function replaceConfigString(configOption, message) {
-		jsonfile.readFile(baseFolder+"/config-1.3.JSON", function (err,obj) {
+		jsonfile.readFile(baseFolder+"/config-1.4.JSON", function (err,obj) {
 			try {
 				for (var i=0; i< obj.length; i++) {
 					if (obj[i]['config'] == configOption) {
 						obj[i]['theOption'] = message;
-						jsonfile.writeFileSync(baseFolder+"/config-1.3.JSON", obj);
+						jsonfile.writeFileSync(baseFolder+"/config-1.4.JSON", obj);
 						break;
 					}
 				}
@@ -184,7 +200,7 @@ wss.on('connection', function connection(ws) {
 		});
 	}
 	function sendConfig() {
-		jsonfile.readFile(baseFolder+"/config-1.3.JSON", function (err,obj) {
+		jsonfile.readFile(baseFolder+"/config-1.4.JSON", function (err,obj) {
 				wss.clients.forEach(function each(client) {
 					for (var i=0; i< obj.length; i++) {
 						var configOption = obj[i]['config'];

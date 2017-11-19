@@ -58,5 +58,6 @@ function startConvert() {
 			}
 		});
 	}
+	console.log("Done.");
 }
 }

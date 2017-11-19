@@ -73,6 +73,9 @@ var cooldownprice = "10000";
 var sideimage = "bit.png";
 var wheelArray = [];
 var oldSchoolAnimation = false;
+var repeats = true;
+var previousSelection = "undefined";
+var  volume = 100;
 Array.prototype.removeValue = function(name, value){
    var array = $.map(this, function(v,i){
       return v[name] === value ? null : v;
@@ -107,7 +110,6 @@ websocket.onmessage = function(ev) {
 		var message = ev.data;
 		var matches = message.match(pattern1);
 		wheelArray = JSON.parse(matches[1]);
-		console.log(wheelArray[2]);
 	};
 	if (re2.test(ev.data)) {
 		var message = ev.data;
@@ -130,12 +132,25 @@ websocket.onmessage = function(ev) {
 			} else if (matches[2] == "false") {
 				playsound = false
 			}
-		} else if (matches[1]=="sideimage") {
+		} else if (matches[1]=="volume") {
+			try {
+				volume = matches[2];
+				volume = matches[2];
+			} catch(err) {
+				console.log(err);
+			}
+		}else if (matches[1]=="sideimage") {
 			try {
 				document.getElementById("sideimages1").src = matches[2];
 				document.getElementById("sideimages2").src = matches[2];
 			} catch(err) {
 				console.log(err);
+			}
+		} else if (matches[1]=="repeatmode") {
+			if(matches[2] == "true") {
+				repeats = true
+			} else if (matches[2] == "false") {
+				repeats = false
 			}
 		} else if (matches[1]=="showprice") {
 			if(matches[2] == "true") {
@@ -169,6 +184,10 @@ websocket.onmessage = function(ev) {
 		$('#table').fadeIn('fast');
 		setTimeout(function() {
 			finalSelection = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+			while(finalSelection == previousSelection && finalSelection != "undefined" && repeats) {
+				console.log("THATS A REPEAT!");
+				finalSelection = wheelArray[Math.floor(Math.random() * wheelArray.length)];
+			}
 		},300);
 		if(oldSchoolAnimation) {
 			setTimeout(function() {
@@ -176,6 +195,8 @@ websocket.onmessage = function(ev) {
 				isSpinning = true;
 				document.getElementById("selectionSpot").classList.remove("hidden");
 				if(playsound) {
+					// TODO test this
+					click.volume = (volume/100);
 					click.play();
 				}
 			},25);
@@ -491,6 +512,7 @@ websocket.onmessage = function(ev) {
 					document.getElementById("selectionSpot").style.fontSize = "24vh";
 				}
 				websocket.send("wheelselected "+finalSelection);
+				previousSelection = finalSelection;
 			},3200);
 			setTimeout(function() {
 				$('#table').fadeOut('slow');
@@ -516,6 +538,7 @@ websocket.onmessage = function(ev) {
 			}
 				isSpinning = true;
 				if(playsound) {
+					click.volume = (volume/100);
 					click.play();
 				}
 			},310);
