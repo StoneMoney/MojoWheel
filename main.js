@@ -75,6 +75,17 @@ fs.readFile(index, function (err, html) {
         response.end();  
     }).listen(8000);
 });
+//hosting result.html on localhost:8000 instead of also moving it to workspace
+fs.readFile(result, function (err, html) {
+    if (err) {
+        throw err; 
+    }       
+    http.createServer(function(request, response) {  
+        response.writeHeader(200, {"Content-Type": "text/html"});  
+        response.write(html);  
+        response.end();  
+    }).listen(8001);
+});
 //open localhost:8000 in default browser
 opn('http://localhost:8000');
 wss.on('connection', function connection(ws) {

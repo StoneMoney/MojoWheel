@@ -88,7 +88,8 @@ var re1 = new RegExp(pattern1,"i");
 var pattern2 = "^config ([A-Z]+|[a-z]+) (.*)";
 var re2 = new RegExp(pattern2,"i");
 //create a new WebSocket object.
-websocket = new WebSocket("ws://localhost:8080/");
+var loc = window.location.hostname;
+websocket = new WebSocket("ws://"+loc+":8080/");
 websocket.onopen = function() {
 	$('#table').fadeOut('slow');
 	websocket.send("config-request");

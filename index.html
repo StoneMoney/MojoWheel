@@ -190,7 +190,7 @@
 	</table>
 	</div><br>
 	<div class="footer">
-		<h5><a href="https://github.com/StoneMoney/MojoWheel/wiki">help and new releases</a><br>[@ngiano | MojoWheel 1.4.1 | 19-11-2017]</h5>
+		<h5><a href="https://github.com/StoneMoney/MojoWheel/wiki">help and new releases</a><br>[@ngiano | MojoWheel 1.4.2 | 31-12-2020]</h5>
 	</div>
 	<script>
 		var wheelPreview = document.getElementById("contents");
@@ -203,7 +203,8 @@
 		var pattern4 = "^config ([A-Z]+|[a-z]+) (.*)";
 		var re4 = new RegExp(pattern4,'i');
 		//create a new WebSocket object.
-		websocket = new WebSocket("ws://localhost:8080/");
+		var loc = window.location.hostname;
+		websocket = new WebSocket("ws://"+loc+":8080/");
 		function reconnectToServer() {
 			location.reload();
 		}
@@ -262,7 +263,7 @@
 			if (re3.test(ev.data)) {
 				var message = ev.data;
 				var matches = message.match(pattern3);
-				document.getElementById("location").innerHTML = matches[1] +"\\result.html";
+				document.getElementById("location").innerHTML = loc+":8001";
 			}
 			if (re4.test(ev.data)) {
 				var message = ev.data;
